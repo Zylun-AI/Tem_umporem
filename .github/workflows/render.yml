@@ -1,0 +1,93 @@
+name: Renderizar e publicar
+on:
+  push:
+    branches: [main]
+    paths: ['jobs/*.json']
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Arquivo de job (ex.: jobs/2026-11-17-long-xxx.json)'
+        required: true
+permissions:
+  contents: read
+  issues: write
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      jobs: ${{ steps.p.outputs.jobs }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - id: p
+        run: |
+          if [ -n "${{ github.event.inputs.job }}" ]; then L="${{ github.event.inputs.job }}"; else L=$(git diff --name-only --diff-filter=AM HEAD^ HEAD -- 'jobs/*.json'); fi
+          echo "jobs=$(printf '%s\n' $L | python3 -c 'import sys,json;print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')" >> $GITHUB_OUTPUT
+          echo "$L"
+  render:
+    needs: plan
+    if: needs.plan.outputs.jobs != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        job: ${{ fromJson(needs.plan.outputs.jobs) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ler job
+        id: job
+        run: |
+          J="${{ matrix.job }}"; cat "$J"
+          echo "ep=$(python3 -c "import json;print(json.load(open('$J'))['episode'])")" >> $GITHUB_OUTPUT
+          echo "publish_at=$(python3 -c "import json;print(json.load(open('$J')).get('publish_at','now'))")" >> $GITHUB_OUTPUT
+          echo "privacy=$(python3 -c "import json;print(json.load(open('$J')).get('privacy',''))")" >> $GITHUB_OUTPUT
+          echo "upload=$(python3 -c "import json;print(str(json.load(open('$J')).get('upload',True)).lower())")" >> $GITHUB_OUTPUT
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11', cache: 'pip' }
+      - name: Instalar
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium > /dev/null
+          pip install -q -r requirements.txt
+          bash tools/get_piper.sh
+      - name: Renderizar
+        run: tools/build.sh "${{ steps.job.outputs.ep }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: video-${{ strategy.job-index }}
+          path: |
+            work/*/video.mp4
+            work/*/thumbnail.jpg
+            work/*/youtube.json
+            work/*/seg_*.log
+          retention-days: 7
+      - name: Enviar ao YouTube
+        if: steps.job.outputs.upload == 'true'
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_PRIVACY: ${{ steps.job.outputs.privacy }}
+        run: |
+          W=work/$(basename "${{ steps.job.outputs.ep }}")
+          T=$W/thumbnail.jpg; [ -f "$T" ] || T=-
+          python3 tools/upload.py "$W/video.mp4" "$T" "$W/youtube.json" "${{ steps.job.outputs.publish_at }}"
+      - name: Relatório
+        if: always()
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          RUN="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          W=work/$(basename "${{ steps.job.outputs.ep }}")
+          if [ -f $W/uploaded.json ]; then
+            URL=$(python3 -c "import json;print(json.load(open('$W/uploaded.json'))['url'])"); TITLE=$(python3 -c "import json;print(json.load(open('$W/youtube.json'))['title'])")
+            gh issue create --title "✅ Enviado: $TITLE" --body "Link: $URL"$'\n'"Publicação: ${{ steps.job.outputs.publish_at }}"$'\n'"Execução: $RUN"
+          elif [ "${{ job.status }}" = "success" ]; then
+            gh issue create --title "🎬 Renderizado (sem upload): ${{ matrix.job }}" --body "Baixe em Artifacts: $RUN"
+          else
+            gh issue create --title "❌ Falha: ${{ matrix.job }}" --body "Veja o log: $RUN"
+          fi

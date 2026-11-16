@@ -1,0 +1,34 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+ @font-face{font-family:'Inter';font-weight:700;src:url(/node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2) format('woff2')}
+ @font-face{font-family:'Inter';font-weight:800;src:url(/node_modules/@fontsource/inter/files/inter-latin-800-normal.woff2) format('woff2')}
+ @font-face{font-family:'Inter';font-weight:900;src:url(/node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2) format('woff2')}
+ html,body{margin:0;background:#000;overflow:hidden}
+ #stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#000;font-family:'Inter',sans-serif;color:#fff}
+ canvas{position:absolute;left:0;top:0}
+ #ov{position:absolute;left:0;top:0}
+ #vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(0,0,0,.55) 100%);pointer-events:none}
+ #flash{position:absolute;inset:0;opacity:0;pointer-events:none}
+ #cap{position:absolute;left:120px;right:120px;bottom:70px;text-align:center;font-weight:900;font-size:64px;letter-spacing:.5px;line-height:1.05;text-transform:uppercase;
+   text-shadow:0 0 0 #000,-3px -3px 0 #000,3px -3px 0 #000,-3px 3px 0 #000,3px 3px 0 #000,0 5px 0 #000,0 -4px 0 #000,4px 0 0 #000,-4px 0 0 #000,0 8px 18px rgba(0,0,0,.6);}
+ /* shorts: legenda pequena, minúscula, 2-3 palavras, uma em amarelo (estilo dos shorts de Roblox) */
+ #stage.short #cap{left:60px;right:60px;bottom:auto;top:1130px;font-size:62px;font-weight:800;text-transform:none;letter-spacing:0;
+   text-shadow:-4px -4px 0 #000,4px -4px 0 #000,-4px 4px 0 #000,4px 4px 0 #000,0 5px 0 #000,0 -5px 0 #000,5px 0 0 #000,-5px 0 0 #000,0 8px 14px rgba(0,0,0,.5)}
+ #stage.short #vig{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 65%,rgba(0,0,0,.35) 100%)}
+ .w-y{color:#ffd21f}.w-r{color:#ff3b30}.w-c{color:#38d6ff}.w-g{color:#3ddc6a}
+ .chip{position:absolute;transform:translate(-50%,-50%);padding:8px 20px;border-radius:12px;font-weight:800;font-size:30px;letter-spacing:.5px;white-space:nowrap;text-transform:uppercase}
+ .chip.gold{background:rgba(40,30,10,.85);border:3px solid #e7b13a;color:#f6c545}
+ .chip.blue{background:rgba(10,30,55,.85);border:3px solid #4aa3ff;color:#9fd0ff}
+ .chip.red{background:rgba(60,10,10,.88);border:3px solid #ff4b3e;color:#ff8a80}
+ .chip.green{background:rgba(8,45,20,.88);border:3px solid #3ddc6a;color:#8dffac}
+ .chip.white{background:rgba(255,255,255,.92);border:3px solid #111;color:#111}
+ .abs{position:absolute}
+ .bubble{position:absolute;transform:translate(-50%,-100%);background:#fff;color:#111;font-weight:800;font-size:38px;padding:14px 26px;border-radius:26px;border:4px solid #111;white-space:nowrap}
+ .bubble:after{content:"";position:absolute;left:50%;bottom:-22px;margin-left:-14px;border:14px solid transparent;border-top:22px solid #111;border-bottom:0}
+</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js"}}</script>
+</head><body>
+<div id="stage"><canvas id="c"></canvas><div id="ov"></div><div id="vig"></div><div id="flash"></div><div id="cap"></div></div>
+<script type="module" src="/engine/main.js"></script>
+</body></html>

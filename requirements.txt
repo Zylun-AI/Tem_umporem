@@ -1,0 +1,7 @@
+numpy
+scipy
+soundfile
+edge-tts==7.2.3
+sherpa-onnx==1.12.40
+google-api-python-client
+google-auth
