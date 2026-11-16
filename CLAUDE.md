@@ -78,5 +78,5 @@ Opções: `skin` light|tan|brown|dark|white|yellow, `shirt`, `pants`, `shoes`, `
 
 ## Histórico (não repita)
 - 2026-10-28 longo: E se a humanidade recomeçasse com apenas 2 pessoas? (`2026-10-28-humanidade-2-pessoas`) — publicado manualmente.
-- 2026-11-16 short (teste): Ela não largava a mala no avião (`2026-11-16-short-mala-do-aviao`).
+- 2026-11-16 short: Ela não largava a mala no avião (`2026-11-16-short-mala-do-aviao`) — publicado na hora (16/11 à noite).
 - Ideia já prometida no final do vídeo 1: "E se a humanidade recomeçasse com 98 pessoas?" — boa candidata a próximo longo.
