@@ -52,7 +52,7 @@ export function extraEnvs(U) {
     const tx = [shelfTex(1), shelfTex(2), shelfTex(3)]; tx.forEach(t => rep(t, 5, 1));
     for (const x of [-15, -9, -3, 3, 9, 15]) { const sh = new T.Group(); sh.position.set(x, 0, -20);
       const mats = [0, 1, 2, 3, 4, 5].map(i => (i === 0 || i === 1) ? new T.MeshLambertMaterial({ map: tx[(Math.abs(x) / 3 | 0) % 3] }) : lam(0xcfd3d8)); const m = new T.Mesh(new T.BoxGeometry(0.8, 2.3, 50), mats); m.position.y = 1.15; sh.add(m); g.add(sh);
-      const lab = ['BOLACHAS', 'ARROZ', 'LATICÍNIOS', 'BEBIDAS', 'LIMPEZA', 'PADARIA'][(Math.abs(x) / 3 + (x < 0 ? 3 : 0)) | 0]; const sc = cvs(256, 64, (c, w, h) => { c.fillStyle = '#d62828'; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = '900 40px Inter'; c.textAlign = 'center'; c.fillText(lab, 128, 46); }); Pl(g, 2.4, 0.6, new T.MeshBasicMaterial({ map: sc }), x, 3.8, 3); Pl(g, 2.4, 0.6, new T.MeshBasicMaterial({ map: sc }), x, 3.8, 2.99, [0, Math.PI, 0]); }
+      const lab = ['BOLACHAS', 'ARROZ', 'LATICÍNIOS', 'BEBIDAS', 'LIMPEZA', 'PADARIA'][((Math.abs(x) / 3 + (x < 0 ? 3 : 0)) | 0) % 6]; const sc = cvs(256, 64, (c, w, h) => { c.fillStyle = '#d62828'; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = '900 40px Inter'; c.textAlign = 'center'; c.fillText(lab, 128, 46); }); Pl(g, 2.4, 0.6, new T.MeshBasicMaterial({ map: sc }), x, 3.8, 3); Pl(g, 2.4, 0.6, new T.MeshBasicMaterial({ map: sc }), x, 3.8, 2.99, [0, Math.PI, 0]); }
     // geladeiras fundo
     for (let i = 0; i < 9; i++) { B(g, 2.2, 2.3, 0.9, 0xdfe6ec, -17.6 + i * 4.4, 1.15, -59); B(g, 2.0, 2.0, 0.05, 0x9fd4ff, -17.6 + i * 4.4, 1.2, -58.5, { m: { transparent: true, opacity: 0.5 } }); }
     // caixas
