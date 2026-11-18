@@ -81,4 +81,5 @@ Opções: `skin` light|tan|brown|dark|white|yellow, `shirt`, `pants`, `shoes`, `
 - 2026-11-16 short: Ela não largava a mala no avião (`2026-11-16-short-mala-do-aviao`) — publicado na hora (16/11 à noite).
 - 2026-11-17 short: Ela dividia o lanche com um estranho todo dia (`2026-11-17-short-senhor-do-banco`) — avô na praça; publica 12:00.
 - 2026-11-17 longo: E se a humanidade recomeçasse com 98 pessoas? (`2026-11-17-humanidade-98-pessoas`) — Bia, Seu Jorge, Dra. Helena; publica 18:00.
+- 2026-11-18 short: Ele pescou uma garrafa com um bilhete dentro (`2026-11-18-short-garrafa-no-mar`) — pescador Pedro, bilhete escrito por ele mesmo aos 8 anos; publica 12:00.
 - Ideia já prometida no final do vídeo 2: "E se a humanidade tivesse que recomeçar em Marte?" — boa candidata a próximo longo.
