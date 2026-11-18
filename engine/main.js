@@ -142,6 +142,7 @@ function placeChar(c, keys, t, ctx) {
   c.root.scale.setScalar(num('s', c.o.scale));
   c._blink = (Math.sin(t * 1.9 + c.o.shirt) > 0.985) ? 0.9 : 0; c._gx = k0.gx || 0; c._gy = k0.gy || 0;
   c.setHold(k0.hold || null);
+  if (c.helmet) { c.helmet.visible = !!k0.suit; c.pack.visible = !!k0.suit; if (c.rim) c.rim.visible = !!k0.suit; }
   const emN = k0.e2 || 'neutral'; const emO = Object.assign({ name: emN }, EMOTES[emN]);
   if (i > 0 && t - k0.t < 0.15 && keys[i - 1].e2 && keys[i - 1].e2 !== emN) { const pe = EMOTES[keys[i - 1].e2]; const w = (t - k0.t) / 0.15; for (const f of ['eye', 'lid', 'tilt', 'pr']) emO[f] = lerp(pe[f], emO[f], w); }
   if (k0.over) for (const f in k0.over) pose[f] = k0.over[f];

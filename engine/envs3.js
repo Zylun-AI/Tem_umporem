@@ -1,7 +1,7 @@
 // Cenários extras pensados para os shorts (estilo jogos de Roblox): casa, avião (cabine e céu),
 // oceano com navio, parque, baseplate. Todos centrados na origem, chão em y=0.
 export function moreEnvs(U) {
-  const { THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, lam, hex } = U;
+  const { THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, lam, hex, mix, clamp, lerp } = U;
   const T = THREE;
   const rep = (t, a, b) => { t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(a, b); return t; };
   const plank = (c1, c2) => cvs(256, 256, (x, w, h) => { x.fillStyle = hex(c1); x.fillRect(0, 0, w, h); x.strokeStyle = hex(c2); x.lineWidth = 3; for (let i = 0; i <= 8; i++) { x.beginPath(); x.moveTo(0, i * 32); x.lineTo(w, i * 32); x.stroke(); for (let j = 0; j < 2; j++) { const xx = ((i * 97 + j * 131) % 256); x.beginPath(); x.moveTo(xx, i * 32); x.lineTo(xx, i * 32 + 32); x.stroke(); } } });
@@ -43,7 +43,8 @@ export function moreEnvs(U) {
     B(g, 5.5, 0.3, L, 0xe8e8e8, 0, 4.0, -3); for (const sx of [-1, 1]) B(g, 1.2, 0.6, L, 0xdcdcdc, sx * 2.3, 3.45, -3);
     const win = cvs(64, 64, (x, w, h) => { x.fillStyle = '#e8e8e8'; x.fillRect(0, 0, w, h); x.fillStyle = '#8fd0ff'; x.beginPath(); x.roundRect(14, 8, 36, 48, 14); x.fill(); });
     const rows = []; for (let r = 0; r < 13; r++) rows.push(6 - r * 1.4);
-    for (const z of rows) for (const sx of [-1, 1]) Pl(g, 0.6, 0.6, new T.MeshBasicMaterial({ map: win }), sx * 3.2, 2.0, z, [0, -sx * Math.PI / 2, 0]);
+    const winSpace = cvs(64, 64, (x, w, h) => { x.fillStyle = '#e8e8e8'; x.fillRect(0, 0, w, h); x.fillStyle = '#05070f'; x.beginPath(); x.roundRect(14, 8, 36, 48, 14); x.fill(); x.fillStyle = '#fff'; for (const [a, b] of [[22, 18], [40, 30], [28, 44], [34, 14]]) x.fillRect(a, b, 2, 2); });
+    const winMs = []; for (const z of rows) for (const sx of [-1, 1]) winMs.push(Pl(g, 0.6, 0.6, new T.MeshBasicMaterial({ map: win }), sx * 3.2, 2.0, z, [0, -sx * Math.PI / 2, 0]));
     const seat = (x, z, c) => { B(g, 0.8, 0.15, 0.75, c, x, 0.5, z); B(g, 0.8, 1.1, 0.16, c, x, 1.05, z + 0.4, { r: [-0.12, 0, 0] }); B(g, 0.6, 0.2, 0.12, 0xdddddd, x, 1.6, z + 0.47); B(g, 0.1, 0.4, 0.6, 0x555555, x - 0.43, 0.4, z); };
     for (const z of rows) for (const x of [-2.0, -1.15, 1.15, 2.0]) seat(x, z, 0x24407a);
     const zw = 6 - 13 * 1.4 + 0.4;   // parede da cabine do piloto
@@ -53,7 +54,7 @@ export function moreEnvs(U) {
     for (const sx of [-1.0, 1.0]) { B(g, 0.8, 0.15, 0.75, 0x3a3a3a, sx, 0.5, zw - 1.8); B(g, 0.8, 1.1, 0.16, 0x3a3a3a, sx, 1.05, zw - 1.4); }
     B(g, 6.8, 0.1, 4, 0x2b2b2b, 0, -0.04, zw - 2); B(g, 6.8, 0.2, 4, 0xe0e0e0, 0, 3.9, zw - 2); B(g, 0.15, 4, 4, 0xd0d0d0, -3.3, 2, zw - 2); B(g, 0.15, 4, 4, 0xd0d0d0, 3.3, 2, zw - 2);
     g.userData = { rows, seatsX: [-2.0, -1.15, 1.15, 2.0], seatY: 0.5, cockpitZ: zw - 1.8, doorZ: zw };
-    return { bg: 0xffffff, hemi: [0xffffff, 0x8a8f9a, 1.2], sun: [0xffffff, 0.6, [4, 10, 6]], apply(p, t) { cd.position.x = (p.cockpitOpen || 0) * 1.25; g.rotation.z = (p.tilt || 0) + (p.shake ? Math.sin(t * 23) * 0.012 * p.shake : 0); g.rotation.x = p.pitch || 0; } };
+    return { bg: 0xffffff, hemi: [0xffffff, 0x8a8f9a, 1.2], sun: [0xffffff, 0.6, [4, 10, 6]], apply(p, t) { winMs.forEach(m => m.material.map = p.space ? winSpace : win); cd.position.x = (p.cockpitOpen || 0) * 1.25; g.rotation.z = (p.tilt || 0) + (p.shake ? Math.sin(t * 23) * 0.012 * p.shake : 0); g.rotation.x = p.pitch || 0; } };
   });
 
   // ================= CÉU (avião voando por fora) =================
@@ -112,6 +113,69 @@ export function moreEnvs(U) {
     for (let x = 1.5; x < 16; x += 1.2) { B(g, 0.08, 0.9, 0.08, 0xffffff, x, 0.45, 1.5); } B(g, 14.5, 0.07, 0.05, 0xffffff, 8.75, 0.8, 1.5); B(g, 14.5, 0.07, 0.05, 0xffffff, 8.75, 0.45, 1.5);
     Cy(g, 0.07, 0.09, 4, 0x333333, -2, 2, 3); Sp(g, 0.25, 0xfff2c0, -2, 4.1, 3, { basic: true });
     return { bg: 0xbfe6ff, fog: [0xd8f0ff, 40, 140], hemi: [0xffffff, 0x6a8a4a, 1.1], sun: [0xfff4e0, 0.95, [10, 25, 12]], apply(p, t) { sw.rotation.x = Math.sin(t * 2.4) * (p.swing ?? 0.5); } };
+  });
+
+  // ================= MARTE (base "Nova Esperança") =================
+  // Domo principal em (0,0,-12) r=5, porta virada p/ +z em z≈-7. Estufa (domo de vidro) em (12,0,-12) r=4. Painéis solares x -20..-8, z -4..6.
+  // Foguete em (-16,0,-30). p: tod 'day'|'dusk'|'night', storm 0..1, dust 0..1 (poeira nos painéis), green 0..1 (plantas), glow 0..1 (luz da estufa),
+  // power 0..1 (janelas), earth (bool, pontinho azul no céu), cable 0..1 (cabo da base até o foguete), base (false esconde a base), rocket (false esconde)
+  mkEnv('mars', (g) => {
+    const R = rng(77); const sk = sky(g);
+    const groundTex = cvs(256, 256, (x, w, h) => { x.fillStyle = '#b4572c'; x.fillRect(0, 0, w, h); for (let i = 0; i < 900; i++) { x.fillStyle = `rgba(${R() < 0.5 ? '90,30,10' : '230,140,90'},${0.08 + R() * 0.12})`; const r = 1 + R() * 6; x.beginPath(); x.arc(R() * w, R() * h, r, 0, 7); x.fill(); } });
+    groundTex.wrapS = groundTex.wrapT = T.RepeatWrapping; groundTex.repeat.set(60, 60);
+    Pl(g, 800, 800, new T.MeshLambertMaterial({ map: groundTex }), 0, 0, 0, [-Math.PI / 2, 0, 0]);
+    for (let i = 0; i < 18; i++) { const a = R() * Math.PI * 2, r = 60 + R() * 200; const d = Sp(g, 14 + R() * 26, i % 2 ? 0xa9502a : 0xc0683a, Math.cos(a) * r, -6, Math.sin(a) * r, { s: [1.6, 0.35 + R() * 0.3, 1] }); }
+    for (let i = 0; i < 8; i++) { const a = -Math.PI * 0.9 + R() * Math.PI * 0.8, r = 180 + R() * 120; const m = new T.Mesh(new T.CylinderGeometry(18 + R() * 20, 30 + R() * 25, 18 + R() * 30, 7), lam(0x9a4526)); m.position.set(Math.cos(a) * r, 8, Math.sin(a) * r); g.add(m); }
+    for (let i = 0; i < 140; i++) { const a = R() * Math.PI * 2, r = 9 + R() * 120; const x = Math.cos(a) * r, z = Math.sin(a) * r; if (x > -24 && x < 18 && z > -18 && z < 10) continue; const m = new T.Mesh(new T.DodecahedronGeometry(0.2 + R() * (R() < 0.1 ? 1.6 : 0.6), 0), lam(R() < 0.5 ? 0x7a3418 : 0x5e2a14)); m.position.set(x, 0.05, z); m.rotation.set(R() * 3, R() * 3, 0); m.scale.y = 0.6; g.add(m); }
+    for (const [x, z, r] of [[26, 18, 6], [-34, 22, 9], [40, -40, 12]]) { const c = new T.Mesh(new T.TorusGeometry(r, r * 0.18, 8, 32), lam(0x9e4a24)); c.rotation.x = -Math.PI / 2; c.scale.z = 0.35; c.position.set(x, 0, z); g.add(c); }
+    const base = new T.Group(); g.add(base);
+    const dome = new T.Mesh(new T.SphereGeometry(5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), lam(0xf0efe9)); dome.position.set(0, 0, -12); base.add(dome);
+    for (let i = 0; i < 3; i++) { const rr = new T.Mesh(new T.TorusGeometry(5 * Math.cos(0.25 + i * 0.4), 0.06, 6, 40), lam(0xbdbdb6)); rr.rotation.x = Math.PI / 2; rr.position.set(0, 5 * Math.sin(0.25 + i * 0.4), -12); base.add(rr); }
+    const winMat = new T.MeshBasicMaterial({ color: 0x1d2b3a }); const wins = [];
+    for (let i = 0; i < 8; i++) { const a = -Math.PI / 2 + (i - 3.5) * 0.32; if (Math.abs(i - 3.5) < 0.6) continue; const w = new T.Mesh(new T.BoxGeometry(0.9, 0.55, 0.1), winMat); w.position.set(Math.cos(a + Math.PI) * -4.7 * 0 + Math.sin(a + Math.PI / 2) * 0 + 4.62 * Math.cos(a), 2.0, -12 - 4.62 * Math.sin(a)); w.lookAt(0, 2.0, -12); w.rotateY(Math.PI); base.add(w); wins.push(w); }
+    B(base, 2.4, 2.6, 2.6, 0xe2e1da, 0, 1.3, -6.9); const door = B(base, 1.3, 2.0, 0.08, 0x3a4450, 0, 1.0, -5.56); B(base, 1.6, 0.18, 0.12, 0xf2a33a, 0, 2.2, -5.55, { basic: true });
+    const flag = new T.Group(); flag.position.set(3.4, 0, -6.4); Cy(flag, 0.03, 0.03, 3.4, 0xcccccc, 0, 1.7, 0); B(flag, 1.2, 0.7, 0.02, 0x2a6ad6, 0.62, 3.0, 0); B(flag, 0.6, 0.12, 0.03, 0xffd21f, 0.62, 3.0, 0, { basic: true }); base.add(flag);
+    const tun = Cy(base, 1.1, 1.1, 3.4, 0xe2e1da, 6.4, 1.1, -12, { r: [0, 0, Math.PI / 2] });
+    const gh = new T.Group(); gh.position.set(12, 0, -12); base.add(gh);
+    Cy(gh, 4.05, 4.05, 0.4, 0xd8d6cf, 0, 0.2, 0, { seg: 32 });
+    const glass = new T.Mesh(new T.SphereGeometry(4, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), new T.MeshLambertMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.28, depthWrite: false, side: T.DoubleSide })); glass.renderOrder = 4; gh.add(glass);
+    for (let i = 0; i < 6; i++) { const rib = new T.Mesh(new T.TorusGeometry(4, 0.04, 4, 32, Math.PI), lam(0xdadada)); rib.rotation.y = i * Math.PI / 6; gh.add(rib); }
+    const plants = []; for (let r = 0; r < 3; r++) for (let k = 0; k < 7; k++) { const x = -2.4 + k * 0.8, z = -1.4 + r * 1.4; if (x * x + z * z > 10) continue; const pg = new T.Group(); pg.position.set(x, 0.4, z); Sp(pg, 0.32, 0x3fbf4a, 0, 0.3, 0, { s: [1, 0.7, 1] }); Sp(pg, 0.22, 0x2f9a3a, 0.18, 0.5, 0.05); gh.add(pg); plants.push(pg); }
+    B(gh, 5.6, 0.3, 0.5, 0x6b4a2f, 0, 0.45, -1.4); B(gh, 5.6, 0.3, 0.5, 0x6b4a2f, 0, 0.45, 0); B(gh, 5.6, 0.3, 0.5, 0x6b4a2f, 0, 0.45, 1.4);
+    const ghL = new T.PointLight(0xff5ad8, 0, 14); ghL.position.set(0, 3, 0); gh.add(ghL); const ghGlow = new T.Mesh(new T.SphereGeometry(3.9, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), new T.MeshBasicMaterial({ color: 0xff7ae0, transparent: true, opacity: 0, depthWrite: false, side: T.BackSide })); gh.add(ghGlow);
+    const panels = []; for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) { const pg = new T.Group(); pg.position.set(-20 + c * 2.8, 0.9, -3 + r * 3.2); const pn = new T.Group(); pn.rotation.x = -0.4; const top = B(pn, 2.4, 0.08, 1.4, 0x1d3f8a, 0, 0, 0); for (let i = 1; i < 6; i++) B(pn, 0.015, 0.09, 1.4, 0xbfd3ff, -1.2 + i * 0.4, 0, 0); pg.add(pn); B(pg, 0.08, 0.8, 0.08, 0x777c83, -1, -0.45, 0.2); B(pg, 0.08, 0.8, 0.08, 0x777c83, 1, -0.45, 0.2); base.add(pg); panels.push(top); }
+    const rocket = new T.Group(); rocket.position.set(-16, 0, -30); g.add(rocket);
+    Cy(rocket, 2.2, 2.2, 16, 0xe9e9e9, 0, 9, 0, { seg: 24 }); const cone = new T.Mesh(new T.ConeGeometry(2.2, 5, 24), lam(0xe9e9e9)); cone.position.y = 19.5; rocket.add(cone); Cy(rocket, 2.25, 2.25, 1.2, 0x222222, 0, 14, 0, { seg: 24 });
+    for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + 0.4; const leg = B(rocket, 0.3, 4, 0.3, 0x555555, Math.cos(a) * 2.8, 1.6, Math.sin(a) * 2.8); leg.rotation.set(Math.sin(a) * 0.35, 0, -Math.cos(a) * 0.35); }
+    for (let i = 0; i < 5; i++) B(rocket, 0.05, 0.4, 0.4, 0x1d2b3a, Math.cos(i * 0.5 - 1) * 2.22, 15.5, Math.sin(i * 0.5 - 1) * 2.22, { basic: true });
+    const rocket2 = rocket.clone(); rocket2.position.set(-34, 0, -44); g.add(rocket2); const rocket3 = rocket.clone(); rocket3.position.set(-4, 0, -52); g.add(rocket3);
+    // robô solar (tipo Opportunity) em p.rover {x,z,ry,dust}
+    const rover = new T.Group(); g.add(rover); B(rover, 1.2, 0.35, 1.6, 0xd8d0c0, 0, 0.75, 0); const rpan = []; for (const sx of [-1, 1]) rpan.push(B(rover, 1.1, 0.05, 1.5, 0x1d3f8a, sx * 1.15, 0.95, 0)); rpan.push(B(rover, 1.1, 0.05, 0.9, 0x1d3f8a, 0, 0.97, -1.15));
+    Cy(rover, 0.04, 0.04, 1.2, 0xbbbbbb, 0.3, 1.5, 0.6); B(rover, 0.35, 0.2, 0.2, 0xeeeeee, 0.3, 2.1, 0.6); const reye = B(rover, 0.22, 0.1, 0.05, 0x40c0ff, 0.3, 2.1, 0.71, { basic: true });
+    for (const sx of [-1, 1]) for (const z of [-0.7, 0, 0.7]) Cy(rover, 0.22, 0.22, 0.18, 0x333333, sx * 0.75, 0.22, z, { r: [0, 0, Math.PI / 2] }); g.userData.rover = rover;
+    const cpts = [new T.Vector3(-1.2, 0.08, -6), new T.Vector3(-5, 0.08, -10), new T.Vector3(-9, 0.08, -18), new T.Vector3(-13, 0.08, -25), new T.Vector3(-15.2, 0.3, -27.6)];
+    const cableG = new T.TubeGeometry(new T.CatmullRomCurve3(cpts), 80, 0.06, 6); const cable = new T.Mesh(cableG, lam(0xffb000)); g.add(cable); const cableN = cableG.index ? cableG.index.count : cableG.attributes.position.count;
+    const N = 1500; const dp = new Float32Array(N * 3); for (let i = 0; i < N; i++) { dp[i * 3] = (R() - 0.5) * 80; dp[i * 3 + 1] = R() * 12; dp[i * 3 + 2] = (R() - 0.5) * 80 - 6; } const dg = new T.BufferGeometry(); dg.setAttribute('position', new T.BufferAttribute(dp, 3)); const dust = new T.Points(dg, new T.PointsMaterial({ color: 0xd88a55, size: 0.12, transparent: true, opacity: 0.8 })); g.add(dust); const dp0 = dp.slice();
+    const stars = new Float32Array(900 * 3); for (let i = 0; i < 900; i++) { const v = new T.Vector3(R() * 2 - 1, R() + 0.1, R() * 2 - 1).normalize().multiplyScalar(560); stars.set([v.x, v.y, v.z], i * 3); } const stg = new T.BufferGeometry(); stg.setAttribute('position', new T.BufferAttribute(stars, 3)); const st = new T.Points(stg, new T.PointsMaterial({ color: 0xffffff, size: 2, sizeAttenuation: false, fog: false, transparent: true })); st.frustumCulled = false; g.add(st);
+    const earth = new T.Group(); earth.position.set(-20, 110, -380); const ec = new T.Mesh(new T.SphereGeometry(4, 12, 8), new T.MeshBasicMaterial({ color: 0x9fd0ff, fog: false })); earth.add(ec); const eh = new T.Mesh(new T.SphereGeometry(11, 12, 8), new T.MeshBasicMaterial({ color: 0x4aa3ff, transparent: true, opacity: 0.3, fog: false, depthWrite: false })); earth.add(eh); g.add(earth);
+    const sunM = new T.Mesh(new T.SphereGeometry(9, 16, 10), new T.MeshBasicMaterial({ color: 0xfff4e0, fog: false })); g.add(sunM); const sunH = new T.Mesh(new T.SphereGeometry(30, 16, 10), new T.MeshBasicMaterial({ color: 0x9fd0ff, transparent: true, opacity: 0.35, fog: false, depthWrite: false })); sunM.add(sunH);
+    return { bg: 0xe0a578, fog: [0xd99a6a, 120, 500], hemi: [0xffe2c8, 0x7a3a1a, 1.0], sun: [0xffe8d0, 0.9, [30, 40, 20]],
+      apply(p, t) { const tod = p.tod || 'day'; const stm = clamp(p.storm || 0);
+        let top = 0xb7774f, hor = 0xe9b88c, bg = 0xe0a578, fogC = 0xd99a6a, hemi = [0xffe2c8, 0x7a3a1a, 1.0], sunC = [0xffe8d0, 0.9, [30, 40, 20]];
+        if (tod === 'dusk') { top = 0x2a2440; hor = 0x7fb0e0; bg = 0x5a6a90; fogC = 0x6a5a70; hemi = [0x9ab4ff, 0x4a2418, 0.7]; sunC = [0xbcd6ff, 0.6, [-60, 8, -200]]; }
+        if (tod === 'night') { top = 0x05060e; hor = 0x1c1420; bg = 0x0a0910; fogC = 0x120d14; hemi = [0x6a7aa8, 0x2a1410, 0.38]; sunC = [0x8fa6ff, 0.12, [-20, 40, 10]]; }
+        top = mix(top, 0x5a2a14, stm).getHex(); hor = mix(hor, 0xa0582c, stm).getHex(); bg = mix(bg, 0x8a4a28, stm).getHex(); fogC = mix(fogC, 0x9a5a32, stm).getHex();
+        sk.userData.set(top, hor); this.bg = bg; this.fog = [fogC, lerp(120, 2, stm), lerp(500, 38, stm)]; this.hemi = [hemi[0], hemi[1], hemi[2] * (1 - 0.45 * stm)]; this.sun = [sunC[0], sunC[1] * (1 - 0.8 * stm), sunC[2]];
+        st.visible = tod !== 'day' && stm < 0.3; st.material.opacity = tod === 'night' ? 1 : 0.5; earth.visible = !!p.earth && stm < 0.3;
+        sunM.visible = tod === 'dusk' && stm < 0.3; sunM.position.set(-60, 42, -320);
+        base.visible = p.base !== false; rocket.visible = p.rocket !== false;
+        rocket2.visible = (p.ships || 1) >= 2; rocket3.visible = (p.ships || 1) >= 3; const rv = p.rover; rover.visible = !!rv; if (rv) { rover.position.set(rv.x || 0, 0, rv.z || 0); rover.rotation.y = rv.ry || 0; rpan.forEach(m => m.material.color.copy(mix(0x1d3f8a, 0xb4572c, rv.dust || 0))); reye.material.color.set(rv.off ? 0x111111 : 0x40c0ff); }
+        const du = clamp(p.dust || 0); panels.forEach(m => m.material.color.copy(mix(0x1d3f8a, 0xb4572c, du)));
+        const pw = p.power === undefined ? 1 : p.power; winMat.color.set(tod === 'day' ? mix(0x1d2b3a, 0x3a5a7a, pw).getHex() : mix(0x1d2b3a, 0xffd98a, pw).getHex());
+        const gr = p.green === undefined ? 1 : p.green; plants.forEach(pg => { pg.scale.setScalar(0.05 + 0.95 * gr); pg.visible = gr > 0.01; });
+        const gl = p.glow || 0; ghL.intensity = gl * 30; ghGlow.material.opacity = gl * 0.25;
+        const cb = p.cable || 0; cable.visible = cb > 0.001; cableG.setDrawRange(0, Math.floor(cableN * cb / 3) * 3);
+        dust.visible = stm > 0.02; dust.material.opacity = 0.9 * stm; const a = dust.geometry.attributes.position; for (let i = 0; i < a.count; i++) { a.setX(i, ((dp0[i * 3] + t * (14 + (i % 7) * 3) * stm + 40) % 80 + 80) % 80 - 40); a.setY(i, dp0[i * 3 + 1] + Math.sin(t * 2 + i) * 0.3); } a.needsUpdate = true; } };
   });
 
   // ================= BASEPLATE (o clássico do Roblox) =================

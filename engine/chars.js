@@ -122,6 +122,11 @@ export class Char {
     this.head = new THREE.Group(); this.head.position.y = 0.96; this.torso.add(this.head);
     const hm = new THREE.Mesh(G('head', () => new THREE.SphereGeometry(0.31, 28, 20)), skin); this.head.add(hm);
     this.buildFace(); this.buildHead();
+    // traje espacial opcional (capacete de vidro + mochila), ligado por key {suit:true} no track
+    { const hg = new THREE.Group(); const glass = new THREE.Mesh(G('helm', () => new THREE.SphereGeometry(0.47, 28, 20)), new THREE.MeshLambertMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.22, depthWrite: false })); glass.renderOrder = 5; hg.add(glass);
+      const rim = new THREE.Mesh(G('helmrim', () => new THREE.TorusGeometry(0.27, 0.05, 8, 24)), lam(0xdedede)); rim.rotation.x = Math.PI / 2; rim.position.y = 0.66; rim.visible = false; this.torso.add(rim); this.rim = rim;
+      const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.06), new THREE.MeshBasicMaterial({ color: 0xfff6c0 })); lamp.position.set(0.2, 0.38, 0.22); hg.add(lamp);
+      hg.visible = false; this.head.add(hg); const pack = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.5, 0.2), lam(0xe8e8e8)); pack.position.set(0, 0.38, -0.22); pack.visible = false; this.torso.add(pack); this.helmet = hg; this.pack = pack; }
     // arms
     this.arms = {};
     for (const [side, sx] of [['L', 1], ['R', -1]]) {

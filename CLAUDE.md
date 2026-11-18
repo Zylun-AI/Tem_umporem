@@ -51,9 +51,10 @@ SHOTS.b01 = (c) => { c.env('street', {tod:'dawn'}); c.track('nome', [{t:0, p:[x,
 API do `c` (ver `engine/main.js` → `makeCtx`):
 - `c.t` tempo no beat, `c.dur`, `c.at('trecho da fala')` → segundo em que a frase é dita (sincronize tudo com isso).
 - `c.env(nome, params)` — cenários e parâmetros:
-  - palito/geral: `street` {tod: day|dawn|dusk|night|gray, light: red|green, flick, grow 0–1, collapse 0–1, ruin, cars}, `lab` {alarm, timer, level, dispOk, power, mist, doorOpen}, `void`, `bakery`, `market` {power}, `stadium`, `citynight` {black}, `metro` {water, power}, `roof` {shoot}, `hospital` {torch, power}, `farm` {cycle, plant, dead}, `vault`, `solar` {removed, on, spark}, `library` {bolts}, `classroom` {board: (ctx2d, W, H) => desenho no quadro}, `gen` {power, shake, crank, smoke}, `final` {night}, `outro`
+  - palito/geral: `street` {tod: day|dawn|dusk|night|gray, light: red|green, flick, grow 0–1, collapse 0–1, ruin, cars}, `lab` {alarm, timer, level, dispOk, power, mist, doorOpen}, `void`, `bakery`, `market` {power}, `stadium`, `citynight` {black}, `metro` {water, power}, `roof` {shoot}, `hospital` {torch, power}, `farm` {cycle, plant, dead}, `mars` {tod: day|dusk|night, storm, dust, green, glow, power, earth, cable, ships 1–3, rover:{x,z,ry,dust,off}, base, rocket} (domo em (0,-12), estufa em (12,-12), painéis x −20..−9, foguete em (−16,−30)), `vault`, `solar` {removed, on, spark}, `library` {bolts}, `classroom` {board: (ctx2d, W, H) => desenho no quadro}, `gen` {power, shake, crank, smoke}, `final` {night}, `outro`
+  - `plane` também serve de nave espacial no longo com `{space:true}` (janelas com estrelas).
   - shorts: `house` {door, tv, tvColor}, `plane` (cabine; assentos x=±1.15/±2.0, fileiras z=6−1.4r; {cockpitOpen, tilt, shake, pitch}), `sky` {plane:{x,y,z,rx,ry,rz}, cloudSpeed}, `ocean` {night, sink, ship, ice, boat:{x,z,ry,flip}}, `park` {swing}, `baseplate`
-- `c.track(nome, keys)` personagem: keys `{t, p:[x,y,z], ry, a, e2, hold, over:{campo:valor}, y, s, gx, gy}`. Frente do personagem: `ry=0` olha +z, `ry=PI` olha −z, `ry=PI/2` olha +x.
+- `c.track(nome, keys)` personagem: keys `{t, p:[x,y,z], ry, a, e2, hold, over:{campo:valor}, y, s, gx, gy, suit}` (`suit:true` = capacete de vidro + mochila no palito). Frente do personagem: `ry=0` olha +z, `ry=PI` olha −z, `ry=PI/2` olha +x.
   - Animações `a`: idle walk run sprint sit sitleg floor floorEat crouch kneel point pointup shrug cheer dance hurt think lookup lookdown lookaround panic talk shout write wipe carry carryidle drive ride hug shoulder fall lie wave clap sleep tired turn crank tinker hold surf eat phone ridephone ridestop ridelook
   - Emoções `e2`: neutral happy smirk sad angry surprised scared worried tired cry deadpan (no Roblox cada uma vira um rosto oficial)
   - `hold`/props: can wrench book marker phone light needle ball bean pan bread bandage bolt suitcase dog mic cup bottle bag paper laptop money key flower baby umbrella
@@ -82,4 +83,5 @@ Opções: `skin` light|tan|brown|dark|white|yellow, `shirt`, `pants`, `shoes`, `
 - 2026-11-17 short: Ela dividia o lanche com um estranho todo dia (`2026-11-17-short-senhor-do-banco`) — avô na praça; publica 12:00.
 - 2026-11-17 longo: E se a humanidade recomeçasse com 98 pessoas? (`2026-11-17-humanidade-98-pessoas`) — Bia, Seu Jorge, Dra. Helena; publica 18:00.
 - 2026-11-18 short: Ele pescou uma garrafa com um bilhete dentro (`2026-11-18-short-garrafa-no-mar`) — pescador Pedro, bilhete escrito por ele mesmo aos 8 anos; publica 12:00.
-- Ideia já prometida no final do vídeo 2: "E se a humanidade tivesse que recomeçar em Marte?" — boa candidata a próximo longo.
+- 2026-11-18 longo: E se a humanidade tivesse que recomeçar em Marte? (`2026-11-18-humanidade-em-marte`) — Lia, Rafa, Dra. Nina, Teo; base Nova Esperança; publica 18:00.
+- Ideia já prometida no final do vídeo 3: "E se a humanidade tivesse que recomeçar debaixo do mar?" — boa candidata a próximo longo.
