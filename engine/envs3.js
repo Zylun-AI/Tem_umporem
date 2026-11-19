@@ -185,4 +185,146 @@ export function moreEnvs(U) {
     const spawn = B(g, 2.4, 0.3, 2.4, 0x6a6f76, 0, 0.15, 0); Pl(g, 1.6, 1.6, new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 }), 0, 0.31, 0, [-Math.PI / 2, 0, 0]);
     return { bg: 0xbfe2ff, fog: [0xdff1ff, 60, 180], hemi: [0xffffff, 0x777777, 1.1], sun: [0xffffff, 0.9, [12, 30, 10]], apply(p) { spawn.visible = p.spawn !== false; } };
   });
+
+  // ================= FUNDO DO MAR (base "Atlântida") =================
+  // Módulo principal: cilindro deitado ao longo de x, centro (0, 2.6, -10), r=2.2, x -6..6; janelas na face +z (z≈-7.8).
+  // Porta molhada (entrada) em (7.4, 0, -10). Domo (escola) em (-11, 0, -10) r=3.5. Fazenda de kelp x 8..18, z -1..8. Recife x -18..-6, z 0..9.
+  // Turbina de maré em (16, 0, -28). Cabo da boia sobe do topo do módulo (0, 4.8, -10) até a superfície (y=40).
+  // p: night, power 0..1 (janelas), alarm 0..1, storm 0..1, light 0..1 (raios de sol; padrão 1 de dia), kelp 0..1, buoy (cabo da boia: true|'broken'|false),
+  //    cable 0..1 (cabo novo até a turbina), spin (velocidade da turbina), fish {x,y,z,r,n} (cardume), glowy 0..1 (bioluminescência), more (módulos extras), base (false esconde)
+  mkEnv('sea', (g) => {
+    const R = rng(55);
+    const sandTex = cvs(256, 256, (x, w, h) => { x.fillStyle = '#c9b48a'; x.fillRect(0, 0, w, h); for (let i = 0; i < 700; i++) { x.fillStyle = `rgba(${R() < 0.5 ? '120,100,70' : '240,225,190'},${0.08 + R() * 0.12})`; x.beginPath(); x.arc(R() * w, R() * h, 1 + R() * 4, 0, 7); x.fill(); } x.strokeStyle = 'rgba(140,120,80,.25)'; x.lineWidth = 3; for (let i = 0; i < 10; i++) { x.beginPath(); for (let k = 0; k <= 32; k++) { const xx = k * 8; x.lineTo(xx, i * 26 + Math.sin(k * 0.6 + i) * 5); } x.stroke(); } });
+    sandTex.wrapS = sandTex.wrapT = T.RepeatWrapping; sandTex.repeat.set(70, 70);
+    const floorM = new T.MeshLambertMaterial({ map: sandTex }); Pl(g, 600, 600, floorM, 0, 0, 0, [-Math.PI / 2, 0, 0]);
+    for (let i = 0; i < 14; i++) { const a = R() * Math.PI * 2, r = 50 + R() * 120; Sp(g, 12 + R() * 22, 0x8f8466, Math.cos(a) * r, -5, Math.sin(a) * r, { s: [1.6, 0.45 + R() * 0.3, 1] }); }
+    for (let i = 0; i < 120; i++) { const a = R() * Math.PI * 2, r = 8 + R() * 70; const x = Math.cos(a) * r, z = Math.sin(a) * r; if (x > -16 && x < 19 && z > -16 && z < 9) continue; if (x > 8 && x < 20 && z > -30 && z < -6) continue; const m = new T.Mesh(new T.DodecahedronGeometry(0.3 + R() * (R() < 0.15 ? 1.8 : 0.7), 0), lam(R() < 0.5 ? 0x6e6a5c : 0x5a5850)); m.position.set(x, 0.1, z); m.rotation.set(R() * 3, R() * 3, 0); m.scale.y = 0.6; g.add(m); }
+    // recife de coral
+    const CC = [0xff6f91, 0xff9f43, 0xa66bff, 0xffd166, 0x4ecdc4, 0xff5e5b, 0xf78fb3];
+    const coral = (x, z, s = 1) => { const k = Math.floor(R() * 4), c = CC[Math.floor(R() * CC.length)];
+      if (k === 0) { for (let i = 0; i < 5; i++) Cy(g, 0.06 * s, 0.1 * s, (0.6 + R() * 0.8) * s, c, x + (R() - 0.5) * 0.6 * s, 0.4 * s, z + (R() - 0.5) * 0.6 * s, { r: [(R() - 0.5) * 0.7, 0, (R() - 0.5) * 0.7] }); }
+      else if (k === 1) Sp(g, 0.5 * s, c, x, 0.3 * s, z, { s: [1, 0.7, 1] });
+      else if (k === 2) { const m = new T.Mesh(new T.ConeGeometry(0.45 * s, 1.2 * s, 7, 1, true), new T.MeshLambertMaterial({ color: c, side: T.DoubleSide })); m.position.set(x, 0.6 * s, z); m.rotation.x = Math.PI; g.add(m); }
+      else { const m = new T.Mesh(new T.CircleGeometry(0.7 * s, 12, 0, Math.PI), new T.MeshLambertMaterial({ color: c, side: T.DoubleSide })); m.position.set(x, 0.05, z); m.rotation.y = R() * 3; g.add(m); } };
+    for (let i = 0; i < 70; i++) coral(-18 + R() * 12, 0 + R() * 9, 0.7 + R() * 0.8);
+    for (let i = 0; i < 40; i++) { const a = R() * Math.PI * 2, r = 16 + R() * 30; const x = Math.cos(a) * r, z = Math.sin(a) * r; if (x > 6 && x < 20 && z > -30 && z < 9) continue; coral(x, z, 0.7 + R() * 0.9); }
+    // base
+    const base = new T.Group(); g.add(base); const hullC = 0xf2efe4;
+    Cy(base, 2.2, 2.2, 12, hullC, 0, 2.6, -10, { r: [0, 0, Math.PI / 2], seg: 28 }); for (const x of [-6, 6]) Sp(base, 2.2, hullC, x, 2.6, -10, { s: [0.35, 1, 1] });
+    for (let x = -5; x <= 5; x += 2.5) Cy(base, 2.26, 2.26, 0.18, 0xf2b705, x, 2.6, -10, { r: [0, 0, Math.PI / 2], seg: 28 });
+    for (const x of [-4.5, 0, 4.5]) for (const z of [-11.4, -8.6]) B(base, 0.35, 0.9, 0.35, 0x7d7f84, x, 0.45, z);
+    B(base, 13, 0.25, 3.4, 0x8a8d92, 0, 0.6, -10);
+    const winM = new T.MeshBasicMaterial({ color: 0xffd98a }); const wins = [];
+    for (let x = -4.5; x <= 4.6; x += 1.5) { const w = new T.Mesh(new T.CircleGeometry(0.42, 18), winM); w.position.set(x, 2.7, -7.79); base.add(w); wins.push(w); const fr = new T.Mesh(new T.TorusGeometry(0.44, 0.06, 6, 20), lam(0x55585e)); fr.position.set(x, 2.7, -7.78); base.add(fr); }
+    const sg = cvs(512, 96, (x, w, h) => { x.fillStyle = '#0d3b66'; x.fillRect(0, 0, w, h); x.fillStyle = '#ffd21f'; x.font = '900 66px Inter'; x.textAlign = 'center'; x.fillText('ATLÂNTIDA', w / 2, 72); });
+    Pl(base, 3.2, 0.6, new T.MeshBasicMaterial({ map: sg }), 0, 4.15, -8.35, [-0.55, 0, 0]);
+    // porta molhada (entrada com piscina por baixo)
+    B(base, 2.6, 3.2, 2.6, 0xe6e2d4, 7.4, 2.2, -10); B(base, 2.7, 0.2, 2.7, 0xf2b705, 7.4, 3.85, -10); B(base, 1.6, 0.05, 1.6, 0x0a2a3a, 7.4, 0.59, -10, { basic: true });
+    for (let i = 0; i < 5; i++) B(base, 0.9, 0.05, 0.08, 0x9a9da2, 7.4, 0.15 + i * 0.12, -8.75 + 0 * i);
+    for (const [x, z] of [[6.3, -8.9], [8.5, -8.9], [6.3, -11.1], [8.5, -11.1]]) B(base, 0.25, 0.65, 0.25, 0x7d7f84, x, 0.32, z);
+    // domo (escola)
+    const dome = new T.Mesh(new T.SphereGeometry(3.5, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2), lam(hullC)); dome.position.set(-11, 0, -10); base.add(dome);
+    for (let i = 0; i < 5; i++) { const a = -0.9 + i * 0.45; const w = new T.Mesh(new T.CircleGeometry(0.35, 14), winM); w.position.set(-11 + Math.sin(a) * 3.36, 1.4, -10 + Math.cos(a) * 3.36); w.lookAt(-11 + Math.sin(a) * 9, 1.4, -10 + Math.cos(a) * 9); base.add(w); wins.push(w); }
+    Cy(base, 0.9, 0.9, 3.0, hullC, -7.3, 1.6, -10, { r: [0, 0, Math.PI / 2] });
+    // módulos extras (anos depois)
+    const more = new T.Group(); g.add(more);
+    Cy(more, 2.0, 2.0, 10, hullC, 2, 2.4, -22, { r: [0, 0, Math.PI / 2], seg: 24 }); for (const x of [-3, 7]) Sp(more, 2.0, hullC, x, 2.4, -22, { s: [0.35, 1, 1] });
+    for (let x = -1.5; x <= 5.6; x += 1.5) { const w = new T.Mesh(new T.CircleGeometry(0.38, 16), winM); w.position.set(x, 2.5, -19.98); more.add(w); }
+    Cy(more, 0.8, 0.8, 9.6, hullC, 1.5, 1.6, -16, { r: [Math.PI / 2, 0, 0] });
+    const dome2 = new T.Mesh(new T.SphereGeometry(3, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), lam(hullC)); dome2.position.set(-12, 0, -24); more.add(dome2);
+    // fazenda de kelp
+    const kelps = []; const kelpM = new T.MeshLambertMaterial({ color: 0x5a8f2a, side: T.DoubleSide });
+    for (let i = 0; i < 44; i++) { const col = i % 11, row = Math.floor(i / 11); const x = 8.5 + col * 0.9 + (R() - 0.5) * 0.3, z = -1 + row * 2.4 + (R() - 0.5) * 0.4; const k = new T.Group(); k.position.set(x, 0, z); g.add(k); const segs = []; let parent = k; const n = 7 + Math.floor(R() * 4);
+      for (let j = 0; j < n; j++) { const sgp = new T.Group(); sgp.position.y = j === 0 ? 0 : 0.7; parent.add(sgp); const leaf = new T.Mesh(new T.PlaneGeometry(0.32, 0.75), kelpM); leaf.position.y = 0.37; leaf.rotation.y = R() * 3; sgp.add(leaf); segs.push(sgp); parent = sgp; }
+      kelps.push({ k, segs, ph: R() * 6 }); }
+    for (let row = 0; row < 4; row++) B(g, 10.5, 0.05, 0.05, 0xd9c27a, 13, 0.3, -1 + row * 2.4);
+    // turbina de maré
+    const tur = new T.Group(); tur.position.set(16, 0, -28); g.add(tur); Cy(tur, 0.5, 0.8, 6, 0x9aa0a8, 0, 3, 0); B(tur, 1.2, 1.2, 3.0, 0xf2b705, 0, 6.2, 0); const rotor = new T.Group(); rotor.position.set(0, 6.2, 1.7); tur.add(rotor);
+    Sp(rotor, 0.45, 0xdddddd, 0, 0, 0); for (let i = 0; i < 3; i++) { const bl = new T.Group(); bl.rotation.z = i * Math.PI * 2 / 3; B(bl, 0.5, 4.2, 0.12, 0xf0f0f0, 0, 2.1, 0); rotor.add(bl); }
+    B(tur, 3, 0.4, 3, 0x6e7177, 0, 0.2, 0);
+    // cabo da boia
+    const buoyC = Cy(g, 0.07, 0.07, 36, 0x222222, 0, 22.8, -10); const buoy = new T.Group(); buoy.position.set(0, 39.6, -10); g.add(buoy); Cy(buoy, 1.3, 1.0, 1.4, 0xf2b705, 0, 0, 0, { seg: 20 }); Cy(buoy, 0.15, 0.15, 3, 0x777, 0, 1.5, 0); B(buoy, 2.4, 0.08, 1.4, 0x1d3f8a, 0, 1.2, 0); const buoyBroken = Cy(g, 0.07, 0.07, 6, 0x222222, 0, 7.8, -10);
+    // superfície vista de baixo
+    const SW = new T.PlaneGeometry(260, 260, 50, 50); const surfM = new T.MeshBasicMaterial({ color: 0x8fdcff, side: T.DoubleSide, transparent: true, opacity: 0.9, fog: false }); const surf = new T.Mesh(SW, surfM); surf.rotation.x = Math.PI / 2; surf.position.y = 40; g.add(surf); const sbase = SW.attributes.position.array.slice();
+    // raios de sol
+    const shafts = []; for (let i = 0; i < 10; i++) { const m = new T.Mesh(new T.CylinderGeometry(1.2 + R() * 1.5, 0.2, 44, 10, 1, true), new T.MeshBasicMaterial({ color: 0xcff4ff, transparent: true, opacity: 0.06, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide, fog: false })); m.position.set(-30 + R() * 60, 20, -40 + R() * 50); m.rotation.z = 0.15; g.add(m); shafts.push(m); }
+    // neve marinha
+    const N = 1600; const sp = new Float32Array(N * 3); for (let i = 0; i < N; i++) { sp[i * 3] = (R() - 0.5) * 70; sp[i * 3 + 1] = R() * 16; sp[i * 3 + 2] = (R() - 0.5) * 70 - 8; } const sgeo = new T.BufferGeometry(); sgeo.setAttribute('position', new T.BufferAttribute(sp, 3)); const snow = new T.Points(sgeo, new T.PointsMaterial({ color: 0xe8f6ff, size: 0.06, transparent: true, opacity: 0.55 })); g.add(snow); const sp0 = sp.slice();
+    // bioluminescência
+    const NB = 2200; const bp = new Float32Array(NB * 3); for (let i = 0; i < NB; i++) { bp[i * 3] = (R() - 0.5) * 60; bp[i * 3 + 1] = 0.3 + R() * 12; bp[i * 3 + 2] = (R() - 0.5) * 60 - 6; } const bgeo = new T.BufferGeometry(); bgeo.setAttribute('position', new T.BufferAttribute(bp, 3)); const bio = new T.Points(bgeo, new T.PointsMaterial({ color: 0x4ff3ff, size: 0.16, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending, fog: false })); g.add(bio);
+    // cardume
+    const fishG = new T.Group(); g.add(fishG); const fish = []; const FC = [0xffb000, 0x2fd0ff, 0xffe066, 0xff7a45];
+    for (let i = 0; i < 48; i++) { const f = new T.Group(); Sp(f, 0.16, FC[i % 4], 0, 0, 0, { s: [0.55, 0.9, 1.6] }); const tail = new T.Mesh(new T.ConeGeometry(0.13, 0.2, 4), lam(FC[i % 4])); tail.rotation.x = -Math.PI / 2; tail.position.z = -0.3; f.add(tail); fishG.add(f); fish.push({ f, a: R() * Math.PI * 2, r: R(), y: R(), sp: 0.85 + R() * 0.3 }); }
+    // cabo novo até a turbina
+    const cpts = [new T.Vector3(7.4, 0.5, -11.3), new T.Vector3(8.6, 0.08, -14), new T.Vector3(11, 0.08, -19), new T.Vector3(14, 0.08, -24), new T.Vector3(15.6, 0.5, -27)];
+    const cableG = new T.TubeGeometry(new T.CatmullRomCurve3(cpts), 80, 0.07, 6); const cable = new T.Mesh(cableG, lam(0xffb000)); g.add(cable); const cableN = cableG.index ? cableG.index.count : cableG.attributes.position.count;
+    const alarmL = new T.PointLight(0xff2020, 0, 30); alarmL.position.set(0, 6, -6); g.add(alarmL);
+    const winL = new T.PointLight(0xffd98a, 0, 14); winL.position.set(0, 2.7, -6.5); g.add(winL);
+    return { bg: 0x0a5a86, fog: [0x0b5f8a, 3, 55], hemi: [0x9fdcff, 0x1a3a4a, 1.0], sun: [0xbfe8ff, 0.8, [5, 40, 8]],
+      apply(p, t) { const n = !!p.night; const stm = clamp(p.storm || 0);
+        let bg = n ? 0x02121f : 0x0a5a86; bg = mix(bg, 0x0a2f3e, stm).getHex(); this.bg = bg; this.fog = [bg, n ? 2 : 3, lerp(n ? 32 : 55, 40, stm)];
+        this.hemi = n ? [0x4a78a8, 0x05121a, 0.55] : [0x9fdcff, 0x1a3a4a, 1.0 - 0.35 * stm]; this.sun = n ? [0x6a8ab8, 0.15, [5, 40, 8]] : [0xbfe8ff, 0.8 * (1 - 0.6 * stm), [5, 40, 8]];
+        base.visible = p.base !== false; more.visible = !!p.more;
+        const pw = p.power === undefined ? 1 : p.power; const al = clamp(p.alarm || 0); const blink = al > 0 ? (Math.sin(t * 7) > 0 ? 1 : 0.25) : 0;
+        winM.color.copy(mix(mix(0x1d3a4a, 0xffd98a, pw), 0xff3030, al * blink)); winL.intensity = pw * (n ? 10 : 4); alarmL.intensity = al * blink * 40;
+        const kg = p.kelp === undefined ? 1 : p.kelp; kelps.forEach((o, i) => { o.k.scale.set(1, Math.max(0.03, kg), 1); o.k.visible = kg > 0.02; o.segs.forEach((s2, j) => { s2.rotation.x = Math.sin(t * 0.9 + o.ph + j * 0.5) * 0.12 * (1 + stm); s2.rotation.z = Math.cos(t * 0.7 + o.ph + j * 0.4) * 0.06; }); });
+        rotor.rotation.z = -t * (p.spin || 0) * 1.6;
+        const bu = p.buoy === undefined ? true : p.buoy; buoyC.visible = bu === true; buoy.visible = bu === true; buoy.position.y = 39.6 + Math.sin(t * (1.2 + stm * 2)) * (0.3 + stm * 2.5); buoy.rotation.z = Math.sin(t * 1.7) * 0.1 * (1 + stm * 3); buoyBroken.visible = bu === 'broken'; if (bu === 'broken') { buoyBroken.rotation.z = Math.sin(t * 1.3) * 0.25; buoyBroken.rotation.x = Math.cos(t * 1.1) * 0.2; }
+        const a = SW.attributes.position.array; const amp = 0.4 + stm * 3.5; for (let i = 0; i < a.length; i += 3) { const x = sbase[i], y = sbase[i + 1]; a[i + 2] = Math.sin(x * 0.12 + t * (1.2 + stm * 2)) * amp + Math.cos(y * 0.15 + t * (1 + stm * 2)) * amp; } SW.attributes.position.needsUpdate = true;
+        surfM.color.set(n ? 0x14324a : mix(0x8fdcff, 0x3a5a66, stm).getHex());
+        const li = n ? 0 : (p.light === undefined ? 1 : p.light) * (1 - stm); shafts.forEach((m, i) => { m.visible = li > 0.01; m.material.opacity = 0.05 * li * (0.7 + 0.3 * Math.sin(t * 0.8 + i)); });
+        const sa = snow.geometry.attributes.position; const drift = 0.3 + stm * 4; for (let i = 0; i < sa.count; i++) { sa.setX(i, ((sp0[i * 3] + t * drift * (0.6 + (i % 5) * 0.2) + 35) % 70 + 70) % 70 - 35); sa.setY(i, ((sp0[i * 3 + 1] - t * 0.15 + 16) % 16 + 16) % 16); } sa.needsUpdate = true; snow.material.opacity = 0.45 + 0.4 * stm;
+        const gw = clamp(p.glowy || 0); bio.visible = gw > 0.01; bio.material.opacity = gw * (0.75 + 0.25 * Math.sin(t * 2)); bio.rotation.y = t * 0.01;
+        const fo = p.fish; fishG.visible = !!fo; if (fo) { const cx = fo.x ?? 4, cy = fo.y ?? 2.2, cz = fo.z ?? 3, rr = fo.r ?? 5, nn = fo.n ?? 48, spd = fo.speed ?? 0.35; fish.forEach((q, i) => { q.f.visible = i < nn; const an = q.a + t * spd * q.sp; const r2 = rr * (0.6 + 0.4 * q.r); q.f.position.set(cx + Math.cos(an) * r2, cy + (q.y - 0.5) * 1.6 + Math.sin(t * 2 + i) * 0.1, cz + Math.sin(an) * r2); q.f.rotation.y = -an + (spd > 0 ? Math.PI : 0); q.f.children[1].rotation.y = Math.sin(t * 12 + i) * 0.5; }); }
+        const cb = p.cable || 0; cable.visible = cb > 0.001; cableG.setDrawRange(0, Math.floor(cableN * cb / 3) * 3); } };
+  });
+
+  // ================= INTERIOR DE ATLÂNTIDA =================
+  // Sala 12 x 7 (x -6..6, z -3.5..3.5), teto 3.2. Janela redonda grande na parede do fundo (0, 1.7, -3.5) r=1.3; janelinhas em x=±3.6.
+  // Piscina de entrada (porta molhada) no chão em (3.6, 0, 1.4) r=1. Mesa em (-2.4, 0, 0.9) (tampo y=0.75; bancos z≈0.1 e 1.7, assento 0,45 m).
+  // Console na parede x=-6 (telas em y≈1.6, z -2..0). Tanques do ar (máquinas) em (-5.1, 0, 2.6) e (-4.0, 0, 2.9). Beliches em x=5.5, z -3..-1.2.
+  // p: power 0..1, alarm 0..1, sun (lâmpada de sol 0..1), night (janela escura), glowy 0..1 (pontos brilhando na janela), fish (bool), screen 'ok'|'red'|'off', haze 0..1 (ar pesado)
+  mkEnv('seahab', (g) => {
+    const R = rng(66);
+    const tileT = cvs(128, 128, (x, w, h) => { x.fillStyle = '#9aa3a8'; x.fillRect(0, 0, w, h); x.strokeStyle = '#7d868b'; x.lineWidth = 4; x.strokeRect(2, 2, w - 4, h - 4); x.fillStyle = '#868f94'; for (const [a, b] of [[12, 12], [116, 12], [12, 116], [116, 116]]) { x.beginPath(); x.arc(a, b, 4, 0, 7); x.fill(); } });
+    tileT.wrapS = tileT.wrapT = T.RepeatWrapping; tileT.repeat.set(12, 7); Pl(g, 12, 7, new T.MeshLambertMaterial({ map: tileT }), 0, 0, 0, [-Math.PI / 2, 0, 0]);
+    const wallC = 0xe4e6e2; B(g, 12, 3.2, 0.2, wallC, 0, 1.6, -3.6); B(g, 12, 3.2, 0.2, wallC, 0, 1.6, 3.6); B(g, 0.2, 3.2, 7.4, wallC, -6.1, 1.6, 0); B(g, 0.2, 3.2, 7.4, wallC, 6.1, 1.6, 0); B(g, 12.4, 0.2, 7.4, 0xd6d9d6, 0, 3.3, 0);
+    for (const z of [-3.45, 3.45]) B(g, 12, 0.14, 0.06, 0xf2b705, 0, 0.9, z); for (const x of [-5.95, 5.95]) B(g, 0.06, 0.14, 7, 0xf2b705, x, 0.9, 0);
+    for (let x = -5; x <= 5; x += 2.5) Cy(g, 0.08, 0.08, 7, 0xa8adb0, x, 3.05, 0, { r: [Math.PI / 2, 0, 0] });
+    const lightM = new T.MeshBasicMaterial({ color: 0xffffff }); for (let x = -4.5; x <= 4.5; x += 3) B(g, 1.8, 0.05, 0.4, 0xffffff, x, 3.19, 0, { basic: true }).material = lightM;
+    // janela grande + janelinhas
+    const waterM = new T.MeshBasicMaterial({ color: 0x0f6d9e }); const win = new T.Mesh(new T.CircleGeometry(1.3, 40), waterM); win.position.set(0, 1.7, -3.48); g.add(win);
+    const ring = new T.Mesh(new T.TorusGeometry(1.32, 0.1, 8, 40), lam(0x55585e)); ring.position.set(0, 1.7, -3.46); g.add(ring);
+    for (const x of [-3.6, 3.6]) { const w = new T.Mesh(new T.CircleGeometry(0.45, 24), waterM); w.position.set(x, 1.8, -3.48); g.add(w); const r2 = new T.Mesh(new T.TorusGeometry(0.47, 0.06, 6, 24), lam(0x55585e)); r2.position.set(x, 1.8, -3.46); g.add(r2); }
+    const wfish = []; for (let i = 0; i < 9; i++) { const f = new T.Mesh(new T.CircleGeometry(0.09, 3), new T.MeshBasicMaterial({ color: [0xffb000, 0x9fe8ff, 0xffe066][i % 3] })); f.scale.set(1.8, 0.8, 1); f.position.z = -3.46; g.add(f); wfish.push({ f, y: 1.7 + (R() - 0.5) * 1.6, ph: R() * 10, sp: 0.25 + R() * 0.25 }); }
+    const wdots = []; for (let i = 0; i < 40; i++) { const d = new T.Mesh(new T.CircleGeometry(0.025 + R() * 0.02, 6), new T.MeshBasicMaterial({ color: 0x5ff6ff, transparent: true })); let x, y; do { x = (R() - 0.5) * 2.5; y = (R() - 0.5) * 2.5; } while (x * x + y * y > 1.2 * 1.2); d.position.set(x, 1.7 + y, -3.455); g.add(d); wdots.push({ d, ph: R() * 6 }); }
+    // piscina de entrada
+    const pool = new T.Mesh(new T.CircleGeometry(1.0, 32), new T.MeshBasicMaterial({ color: 0x1aa3d6 })); pool.rotation.x = -Math.PI / 2; pool.position.set(3.6, 0.012, 1.4); g.add(pool);
+    const prim = new T.Mesh(new T.TorusGeometry(1.02, 0.07, 6, 32), lam(0xf2b705)); prim.rotation.x = Math.PI / 2; prim.position.set(3.6, 0.05, 1.4); g.add(prim); const ripple = new T.Mesh(new T.RingGeometry(0.3, 0.34, 32), new T.MeshBasicMaterial({ color: 0xbff0ff, transparent: true, opacity: 0.6 })); ripple.rotation.x = -Math.PI / 2; ripple.position.set(3.6, 0.02, 1.4); g.add(ripple);
+    // mesa e bancos
+    B(g, 2.4, 0.08, 1.1, 0x8a6a4a, -2.4, 0.75, 0.9); for (const [x, z] of [[-3.4, 0.5], [-1.4, 0.5], [-3.4, 1.3], [-1.4, 1.3]]) B(g, 0.08, 0.72, 0.08, 0x555, x, 0.36, z);
+    for (const z of [0.1, 1.7]) { B(g, 2.2, 0.08, 0.38, 0x6a6f76, -2.4, 0.45, z); B(g, 0.08, 0.45, 0.3, 0x555, -3.3, 0.22, z); B(g, 0.08, 0.45, 0.3, 0x555, -1.5, 0.22, z); }
+    // console
+    B(g, 0.7, 1.0, 2.6, 0x5a6068, -5.65, 0.5, -1.0); const scrM = new T.MeshBasicMaterial({ color: 0x1fd36b }); const scrs = []; for (const z of [-1.8, -1.0, -0.2]) { const s = new T.Mesh(new T.PlaneGeometry(0.66, 0.42), scrM); s.position.set(-5.98, 1.6, z); s.rotation.y = Math.PI / 2; g.add(s); scrs.push(s); B(g, 0.04, 0.48, 0.74, 0x222, -6.0, 1.6, z); }
+    for (let i = 0; i < 6; i++) B(g, 0.05, 0.05, 0.12, [0xff3030, 0x3ddc6a, 0xffd21f][i % 3], -5.3, 1.02, -2 + i * 0.4, { basic: true });
+    // máquinas do ar
+    const fans = []; for (const [x, z] of [[-5.1, 2.6], [-4.0, 2.95]]) { Cy(g, 0.42, 0.42, 2.2, 0xb8c2c8, x, 1.1, z); Cy(g, 0.44, 0.44, 0.1, 0x2a6ad6, x, 1.6, z); const f = new T.Group(); f.position.set(x, 2.25, z); B(f, 0.7, 0.03, 0.1, 0x333, 0, 0, 0); B(f, 0.1, 0.03, 0.7, 0x333, 0, 0, 0); g.add(f); fans.push(f); }
+    Cy(g, 0.06, 0.06, 3, 0x9aa0a8, -4.5, 2.6, 2.95, { r: [0, 0, Math.PI / 2] });
+    // beliches
+    for (const y of [0.45, 1.5]) { B(g, 0.9, 0.12, 1.9, 0x2a3a5a, 5.5, y, -2.2); B(g, 0.85, 0.1, 1.8, 0xf4f4f4, 5.5, y + 0.11, -2.2); } for (const z of [-3.1, -1.3]) B(g, 0.06, 1.9, 0.06, 0x555, 5.0, 0.95, z);
+    // lâmpada de sol
+    const sunM = new T.MeshBasicMaterial({ color: 0x444444 }); const sunP = new T.Mesh(new T.PlaneGeometry(2.0, 1.0), sunM); sunP.rotation.x = Math.PI / 2; sunP.position.set(0.6, 3.18, 1.2); g.add(sunP);
+    const sunL = new T.PointLight(0xffd27a, 0, 9); sunL.position.set(0.6, 2.8, 1.2); g.add(sunL); const roomL = new T.PointLight(0xffffff, 0, 16); roomL.position.set(0, 2.9, 0); g.add(roomL); const alarmL = new T.PointLight(0xff2020, 0, 16); alarmL.position.set(0, 2.9, 0.5); g.add(alarmL);
+    const hz = new T.Mesh(new T.BoxGeometry(11.8, 3.1, 7), new T.MeshBasicMaterial({ color: 0x6a7a50, transparent: true, opacity: 0, depthWrite: false, side: T.BackSide })); hz.position.set(0, 1.6, 0); g.add(hz);
+    return { bg: 0x0d1a24, fog: null, hemi: [0xffffff, 0x8a9096, 1.2], sun: [0xffffff, 0.5, [3, 10, 6]],
+      apply(p, t) { const pw = p.power === undefined ? 1 : p.power; const al = clamp(p.alarm || 0); const blink = al > 0 ? (Math.sin(t * 7) > 0 ? 1 : 0.2) : 0;
+        this.hemi = [mix(0x6a9ac8, 0xffffff, pw).getHex(), 0x6a7076, 0.35 + 0.95 * pw]; this.sun = [0xffffff, 0.15 + 0.4 * pw, [3, 10, 6]];
+        lightM.color.copy(mix(0x2a2a2a, 0xffffff, pw)); roomL.intensity = 6 * pw; alarmL.intensity = 18 * al * blink;
+        waterM.color.set(p.night ? 0x041c2c : 0x0f6d9e); wfish.forEach((o, i) => { const x = ((t * o.sp + o.ph) % 3) - 1.5; const dy = o.y - 1.7; const ok = !!p.fish && !p.night && x * x + dy * dy < 1.1 * 1.1; o.f.visible = ok; o.f.position.x = x; o.f.position.y = o.y + Math.sin(t * 2 + i) * 0.03; });
+        const gw = clamp(p.glowy || 0); wdots.forEach((o, i) => { o.d.visible = gw > 0.01; o.d.material.opacity = gw * (0.5 + 0.5 * Math.sin(t * 2.5 + o.ph)); });
+        const sc = p.screen || (pw > 0.3 ? 'ok' : 'off'); scrM.color.set(sc === 'red' ? (Math.sin(t * 6) > 0 ? 0xff3030 : 0x6a1010) : sc === 'off' ? 0x111418 : 0x1fd36b);
+        fans.forEach(f => f.rotation.y = t * 12 * pw); ripple.scale.setScalar(1 + ((t * 0.6) % 1) * 1.8); ripple.material.opacity = 0.6 * (1 - ((t * 0.6) % 1));
+        const sn = clamp(p.sun || 0); sunM.color.copy(mix(0x444444, 0xfff1b0, sn)); sunL.intensity = sn * 25;
+        hz.material.opacity = 0.18 * clamp(p.haze || 0); } };
+  });
 }
