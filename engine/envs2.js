@@ -151,6 +151,7 @@ export function extraEnvs(U) {
     const spot = new T.SpotLight(0xfff2c0, 0, 22, 0.55, 0.6, 1.2); g.add(spot, spot.target); g.userData.spot = spot;
     const beamM = new T.Mesh(new T.ConeGeometry(2.4, 7, 20, 1, true), new T.MeshBasicMaterial({ color: 0xfff2c0, transparent: true, opacity: 0.09, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })); beamM.geometry.translate(0, -3.5, 0); g.add(beamM); g.userData.beam = beamM;
     return { bg: 0x05070a, fog: [0x05070a, 8, 40], hemi: [0x5d77a6, 0x0c0e12, 0.35], sun: [0x6f86d8, 0.25, [0, 10, 20]], apply(p, t) { const pw = p.power === undefined ? 0 : p.power; this.hemi = [0x5d77a6, 0x0c0e12, 0.28 + 0.8 * pw];
+        if (p.day) { this.hemi = [0xffffff, 0xa9b4b0, 1.55]; this.sun = [0xfff6e8, 0.9, [6, 20, 16]]; this.fog = [0xd9e6e2, 16, 70]; this.bg = 0xd9e6e2; } else { this.sun = [0x6f86d8, 0.25, [0, 10, 20]]; this.fog = [0x05070a, 8, 40]; this.bg = 0x05070a; }
         g.userData.lights.forEach((l, i) => l.material.color.set(pw > 0.5 ? 0xffffff : 0x151515));
         const to = p.torch; if (to) { spot.intensity = 90; spot.position.set(to[0], to[1], to[2]); spot.target.position.set(to[3], to[4], to[5]); beamM.visible = true; beamM.position.set(to[0], to[1], to[2]); beamM.lookAt(to[3], to[4], to[5]); beamM.rotateX(-Math.PI / 2); beamM.rotateX(Math.PI); } else { spot.intensity = 0; beamM.visible = false; } } };
   });

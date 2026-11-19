@@ -84,4 +84,5 @@ Opções: `skin` light|tan|brown|dark|white|yellow, `shirt`, `pants`, `shoes`, `
 - 2026-11-17 longo: E se a humanidade recomeçasse com 98 pessoas? (`2026-11-17-humanidade-98-pessoas`) — Bia, Seu Jorge, Dra. Helena; publica 18:00.
 - 2026-11-18 short: Ele pescou uma garrafa com um bilhete dentro (`2026-11-18-short-garrafa-no-mar`) — pescador Pedro, bilhete escrito por ele mesmo aos 8 anos; publica 12:00.
 - 2026-11-18 longo: E se a humanidade tivesse que recomeçar em Marte? (`2026-11-18-humanidade-em-marte`) — Lia, Rafa, Dra. Nina, Teo; base Nova Esperança; publica 18:00.
+- 2026-11-19 short: O médico novo começou a cantar pra enfermeira (`2026-11-19-short-enfermeira-e-o-bebe`) — enfermeira cantava pro bebê prematuro; 25 anos depois ele volta médico; publica 12:00. (Motor: `hospital` ganhou `{day:true}` = iluminação clara de dia.)
 - Ideia já prometida no final do vídeo 3: "E se a humanidade tivesse que recomeçar debaixo do mar?" — boa candidata a próximo longo.
