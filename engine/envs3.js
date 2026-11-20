@@ -279,12 +279,13 @@ export function moreEnvs(U) {
         surfM.color.set(n ? 0x14324a : mix(0x8fdcff, 0x3a5a66, stm).getHex());
         const li = n ? 0 : (p.light === undefined ? 1 : p.light) * (1 - stm); shafts.forEach((m, i) => { m.visible = li > 0.01; m.material.opacity = 0.05 * li * (0.7 + 0.3 * Math.sin(t * 0.8 + i)); });
         const sa = snow.geometry.attributes.position; const drift = 0.3 + stm * 4; for (let i = 0; i < sa.count; i++) { sa.setX(i, ((sp0[i * 3] + t * drift * (0.6 + (i % 5) * 0.2) + 35) % 70 + 70) % 70 - 35); sa.setY(i, ((sp0[i * 3 + 1] - t * 0.15 + 16) % 16 + 16) % 16); } sa.needsUpdate = true; snow.material.opacity = 0.45 + 0.4 * stm;
-        const gw = clamp(p.glowy || 0); bio.visible = gw > 0.01; bio.material.opacity = gw * (0.75 + 0.25 * Math.sin(t * 2)); bio.rotation.y = t * 0.01;
+        const gw = p.space ? 0.8 : clamp(p.glowy || 0); bio.visible = gw > 0.01; bio.material.opacity = gw * (0.75 + 0.25 * Math.sin(t * 2)); bio.rotation.y = t * 0.01;
         const fo = p.fish; fishG.visible = !!fo; if (fo) { const cx = fo.x ?? 4, cy = fo.y ?? 2.2, cz = fo.z ?? 3, rr = fo.r ?? 5, nn = fo.n ?? 48, spd = fo.speed ?? 0.35; fish.forEach((q, i) => { q.f.visible = i < nn; const an = q.a + t * spd * q.sp; const r2 = rr * (0.6 + 0.4 * q.r); q.f.position.set(cx + Math.cos(an) * r2, cy + (q.y - 0.5) * 1.6 + Math.sin(t * 2 + i) * 0.1, cz + Math.sin(an) * r2); q.f.rotation.y = -an + (spd > 0 ? Math.PI : 0); q.f.children[1].rotation.y = Math.sin(t * 12 + i) * 0.5; }); }
         const cb = p.cable || 0; cable.visible = cb > 0.001; cableG.setDrawRange(0, Math.floor(cableN * cb / 3) * 3); } };
   });
 
   // ================= INTERIOR DE ATLÂNTIDA =================
+  // p.space: janelas mostram estrelas (sala de nave), sem piscina de entrada.
   // Sala 12 x 7 (x -6..6, z -3.5..3.5), teto 3.2. Janela redonda grande na parede do fundo (0, 1.7, -3.5) r=1.3; janelinhas em x=±3.6.
   // Piscina de entrada (porta molhada) no chão em (3.6, 0, 1.4) r=1. Mesa em (-2.4, 0, 0.9) (tampo y=0.75; bancos z≈0.1 e 1.7, assento 0,45 m).
   // Console na parede x=-6 (telas em y≈1.6, z -2..0). Tanques do ar (máquinas) em (-5.1, 0, 2.6) e (-4.0, 0, 2.9). Beliches em x=5.5, z -3..-1.2.
@@ -325,11 +326,95 @@ export function moreEnvs(U) {
       apply(p, t) { const pw = p.power === undefined ? 1 : p.power; const al = clamp(p.alarm || 0); const blink = al > 0 ? (Math.sin(t * 7) > 0 ? 1 : 0.2) : 0;
         this.hemi = [mix(0x6a9ac8, 0xffffff, pw).getHex(), 0x6a7076, 0.35 + 0.95 * pw]; this.sun = [0xffffff, 0.15 + 0.4 * pw, [3, 10, 6]];
         lightM.color.copy(mix(0x2a2a2a, 0xffffff, pw)); roomL.intensity = 6 * pw; alarmL.intensity = 18 * al * blink;
-        waterM.color.set(p.night ? 0x041c2c : 0x0f6d9e); wfish.forEach((o, i) => { const x = ((t * o.sp + o.ph) % 3) - 1.5; const dy = o.y - 1.7; const ok = !!p.fish && !p.night && x * x + dy * dy < 1.1 * 1.1; o.f.visible = ok; o.f.position.x = x; o.f.position.y = o.y + Math.sin(t * 2 + i) * 0.03; });
-        const gw = clamp(p.glowy || 0); wdots.forEach((o, i) => { o.d.visible = gw > 0.01; o.d.material.opacity = gw * (0.5 + 0.5 * Math.sin(t * 2.5 + o.ph)); });
+        const spc = !!p.space; pool.visible = prim.visible = ripple.visible = !spc; waterM.color.set(spc ? 0x02030a : p.night ? 0x041c2c : 0x0f6d9e); wdots.forEach((o, i) => { o.d.material.color.set(spc ? (i % 9 === 0 ? 0x6ab0ff : 0xffffff) : 0x5ff6ff); }); wfish.forEach((o, i) => { const x = ((t * o.sp + o.ph) % 3) - 1.5; const dy = o.y - 1.7; const ok = !!p.fish && !p.night && x * x + dy * dy < 1.1 * 1.1; o.f.visible = ok; o.f.position.x = x; o.f.position.y = o.y + Math.sin(t * 2 + i) * 0.03; });
+        const gw = p.space ? 0.8 : clamp(p.glowy || 0); wdots.forEach((o, i) => { o.d.visible = gw > 0.01; o.d.material.opacity = gw * (0.5 + 0.5 * Math.sin(t * 2.5 + o.ph)); });
         const sc = p.screen || (pw > 0.3 ? 'ok' : 'off'); scrM.color.set(sc === 'red' ? (Math.sin(t * 6) > 0 ? 0xff3030 : 0x6a1010) : sc === 'off' ? 0x111418 : 0x1fd36b);
         fans.forEach(f => f.rotation.y = t * 12 * pw); ripple.scale.setScalar(1 + ((t * 0.6) % 1) * 1.8); ripple.material.opacity = 0.6 * (1 - ((t * 0.6) % 1));
         const sn = clamp(p.sun || 0); sunM.color.copy(mix(0x444444, 0xfff1b0, sn)); sunL.intensity = sn * 25;
         hz.material.opacity = 0.18 * clamp(p.haze || 0); } };
+  });
+
+  // ================= NAVE GERACIONAL (exterior, no espaço) =================
+  // Eixo central ao longo de z (frente = -z, escudo em z≈-62; motor em z≈+82). Anel habitado r=45 em z=0; anel das plantações r=30 em z=26 (janelas verdes).
+  // Ponto do furo no anel das plantações: userData.hitPos (topo do anel, gira junto). p: spin (rad/s, padrão 0.06), power 0..1 (janelas), alarm 0..1 (anel verde pisca vermelho),
+  // hit 0..1 (clarão no furo), earth 0..1 (Terra grande atrás, 0 = some), planet 0..1 (planeta novo à frente, cresce), engine 0..1 (chama do motor), sunA (ângulo do sol)
+  mkEnv('starship', (g) => {
+    const R = rng(404);
+    const N = 1800; const st = new Float32Array(N * 3); for (let i = 0; i < N; i++) { const v = new T.Vector3(R() * 2 - 1, R() * 2 - 1, R() * 2 - 1).normalize().multiplyScalar(850); st.set([v.x, v.y, v.z], i * 3); }
+    const sg = new T.BufferGeometry(); sg.setAttribute('position', new T.BufferAttribute(st, 3)); const stars = new T.Points(sg, new T.PointsMaterial({ color: 0xffffff, size: 2.2, sizeAttenuation: false, fog: false })); stars.frustumCulled = false; g.add(stars);
+    const st2 = new Float32Array(300 * 3); for (let i = 0; i < 300; i++) { const v = new T.Vector3(R() * 2 - 1, (R() * 2 - 1) * 0.25, R() * 2 - 1).normalize().multiplyScalar(840); st2.set([v.x, v.y, v.z], i * 3); }
+    const sg2 = new T.BufferGeometry(); sg2.setAttribute('position', new T.BufferAttribute(st2, 3)); const st2p = new T.Points(sg2, new T.PointsMaterial({ color: 0xbcd4ff, size: 3.5, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.8 })); st2p.frustumCulled = false; g.add(st2p);
+    const S = new T.Group(); g.add(S);
+    const hull = 0xd9dde3, dark = 0x5a6270;
+    Cy(S, 4, 4, 150, hull, 0, 0, 10, { r: [Math.PI / 2, 0, 0] }); for (let z = -50; z <= 70; z += 12) Cy(S, 4.4, 4.4, 1.2, dark, 0, 0, z, { r: [Math.PI / 2, 0, 0] });
+    Cy(S, 16, 6, 6, 0xb8bec8, 0, 0, -64, { r: [Math.PI / 2, 0, 0] }); Cy(S, 16.3, 16.3, 1.2, dark, 0, 0, -67, { r: [Math.PI / 2, 0, 0] });   // escudo da frente
+    Cy(S, 9, 12, 14, 0x8a929e, 0, 0, 82, { r: [Math.PI / 2, 0, 0] }); for (const [x, y] of [[8, 8], [-8, 8], [8, -8], [-8, -8]]) B(S, 3, 3, 26, 0xc8ccd2, x, y, 60);
+    const flameM = new T.MeshBasicMaterial({ color: 0x8fd8ff, transparent: true, opacity: 0.85, depthWrite: false, fog: false }); const flame = new T.Mesh(new T.ConeGeometry(9, 50, 20, 1, true), flameM); flame.rotation.x = Math.PI / 2; flame.position.set(0, 0, 112); S.add(flame);
+    const core = new T.Mesh(new T.SphereGeometry(5, 16, 12), new T.MeshBasicMaterial({ color: 0xffffff, fog: false })); core.position.set(0, 0, 90); S.add(core);
+    // radiadores
+    for (const sx of [-1, 1]) B(S, 22, 0.4, 30, 0xe8ecf0, sx * 15, 0, 48);
+    // anel habitado
+    const ringA = new T.Group(); ringA.position.z = 0; S.add(ringA);
+    ringA.add(new T.Mesh(new T.TorusGeometry(45, 5, 16, 96), lam(hull))); for (const k of [-1, 1]) { const m = new T.Mesh(new T.TorusGeometry(45, 0.5, 6, 96), lam(dark)); m.position.z = k * 4.6; ringA.add(m); }
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; const sp = Cy(ringA, 1.4, 1.4, 40, 0xc0c6ce, Math.cos(a) * 22, Math.sin(a) * 22, 0); sp.rotation.z = a - Math.PI / 2; }
+    const winA = new T.MeshBasicMaterial({ color: 0xffd98a }); for (let i = 0; i < 120; i++) { const a = i / 120 * Math.PI * 2; for (const z of [-2, 2]) { const w = new T.Mesh(new T.BoxGeometry(0.4, 1.4, 1.0), winA); w.position.set(Math.cos(a) * 50.05, Math.sin(a) * 50.05, z); w.rotation.z = a; ringA.add(w); } }
+    // anel das plantações
+    const ringF = new T.Group(); ringF.position.z = 26; S.add(ringF);
+    ringF.add(new T.Mesh(new T.TorusGeometry(30, 3.6, 14, 80), lam(0xc8ced6))); for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + 0.4; const sp = Cy(ringF, 1.1, 1.1, 26, 0xc0c6ce, Math.cos(a) * 13, Math.sin(a) * 13, 0); sp.rotation.z = a - Math.PI / 2; }
+    const winF = new T.MeshBasicMaterial({ color: 0x7dff9a }); for (let i = 0; i < 90; i++) { const a = i / 90 * Math.PI * 2; const w = new T.Mesh(new T.BoxGeometry(0.3, 2.6, 4.6), winF); w.position.set(Math.cos(a) * 33.5, Math.sin(a) * 33.5, 0); w.rotation.z = a; ringF.add(w); }
+    const hitM = new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, fog: false }); const hitS = new T.Mesh(new T.SphereGeometry(3, 16, 12), hitM); hitS.position.set(0, 33.7, 0); ringF.add(hitS);
+    g.userData.ringF = ringF; g.userData.hitS = hitS;
+    // Terra, sol, planeta novo
+    const earth = new T.Group(); g.add(earth); const eTex = cvs(256, 128, (x, w, h) => { x.fillStyle = '#2a6ad6'; x.fillRect(0, 0, w, h); x.fillStyle = '#3f9b4a'; const r2 = rng(8); for (let i = 0; i < 26; i++) { x.beginPath(); x.ellipse(r2() * w, 20 + r2() * (h - 40), 8 + r2() * 26, 5 + r2() * 14, r2() * 3, 0, 7); x.fill(); } x.fillStyle = 'rgba(255,255,255,.75)'; for (let i = 0; i < 30; i++) { x.beginPath(); x.ellipse(r2() * w, r2() * h, 10 + r2() * 30, 2 + r2() * 4, 0, 0, 7); x.fill(); } x.fillRect(0, 0, w, 8); x.fillRect(0, h - 8, w, 8); });
+    const eM = new T.Mesh(new T.SphereGeometry(60, 40, 28), new T.MeshLambertMaterial({ map: eTex })); earth.add(eM); const eAt = new T.Mesh(new T.SphereGeometry(63, 32, 20), new T.MeshBasicMaterial({ color: 0x6ab8ff, transparent: true, opacity: 0.18, side: T.BackSide, fog: false })); earth.add(eAt);
+    const pTex = cvs(256, 128, (x, w, h) => { x.fillStyle = '#2b8f9e'; x.fillRect(0, 0, w, h); const r2 = rng(19); x.fillStyle = '#6aa84f'; for (let i = 0; i < 18; i++) { x.beginPath(); x.ellipse(r2() * w, 15 + r2() * (h - 30), 12 + r2() * 34, 6 + r2() * 18, r2() * 3, 0, 7); x.fill(); } x.fillStyle = '#c9b27a'; for (let i = 0; i < 8; i++) { x.beginPath(); x.ellipse(r2() * w, r2() * h, 6 + r2() * 12, 4 + r2() * 6, 0, 0, 7); x.fill(); } x.fillStyle = 'rgba(255,255,255,.7)'; for (let i = 0; i < 24; i++) { x.beginPath(); x.ellipse(r2() * w, r2() * h, 10 + r2() * 26, 2 + r2() * 4, 0, 0, 7); x.fill(); } });
+    const planet = new T.Group(); g.add(planet); planet.add(new T.Mesh(new T.SphereGeometry(70, 40, 28), new T.MeshLambertMaterial({ map: pTex }))); planet.add(new T.Mesh(new T.SphereGeometry(73, 32, 20), new T.MeshBasicMaterial({ color: 0x9affd8, transparent: true, opacity: 0.16, side: T.BackSide, fog: false })));
+    const sunB = new T.Mesh(new T.SphereGeometry(14, 20, 14), new T.MeshBasicMaterial({ color: 0xfff4d0, fog: false })); g.add(sunB); const sunG = new T.Mesh(new T.SphereGeometry(30, 20, 14), new T.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0.25, depthWrite: false, fog: false })); g.add(sunG);
+    return { bg: 0x010208, fog: null, hemi: [0xb4c4ff, 0x3a3e4a, 0.95], sun: [0xfff4e0, 1.5, [200, 120, 150]],
+      apply(p, t) { const sp = p.spin ?? 0.06; ringA.rotation.z = t * sp + (p.rot0 || 0); ringF.rotation.z = t * sp + (p.rot0 || 0);
+        const pw = p.power ?? 1; winA.color.copy(mix(0x222428, 0xffd98a, pw)); const al = clamp(p.alarm || 0), bl = Math.sin(t * 8) > 0 ? 1 : 0.3; winF.color.copy(mix(mix(0x1a2a1e, 0x7dff9a, pw), new T.Color(0xff3030).multiplyScalar(bl), al));
+        const h = clamp(p.hit || 0); hitM.opacity = h; hitS.scale.setScalar(0.3 + h * 1.2);
+        const e = clamp(p.engine ?? 0.6); flame.visible = core.visible = e > 0.01; flame.scale.set(1, 0.4 + e * (0.9 + 0.1 * Math.sin(t * 30)), 1); flameM.opacity = 0.5 + 0.4 * e;
+        const ea = clamp(p.earth || 0); earth.visible = ea > 0.01; earth.position.set(-60, -40, 120 + 600 * (1 - ea)); earth.scale.setScalar(Math.max(0.05, ea)); eM.rotation.y = t * 0.03;
+        const pl = clamp(p.planet || 0); planet.visible = pl > 0.01; planet.position.set(40, -30, -230 - 520 * (1 - pl)); planet.scale.setScalar(Math.max(0.04, pl)); planet.rotation.y = t * 0.02;
+        const sa = p.sunA ?? 0.6; sunB.position.set(Math.cos(sa) * 760, 180, Math.sin(sa) * 760); sunG.position.copy(sunB.position); sunB.visible = sunG.visible = p.sunVis !== false; this.sun = [0xfff4e0, 1.5, [Math.cos(sa) * 200, 120, Math.sin(sa) * 200]]; } };
+  });
+
+  // ================= ANEL DAS PLANTAÇÕES (interior da nave) =================
+  // Corredor ao longo de z (-20..20), largura x -4.5..4.5, teto y=4.2. Canteiros em x=±2.6 (bordas 1,8..3,4), corredor livre |x|<1.7.
+  // Vão sem canteiro do lado esquerdo em z -9..-3 (dá pra chegar na parede x=-4.5). Furo na parede esquerda em (-4.45, 1.7, -6).
+  // Porta de emergência em z=-19 (desce do teto). p: plant 0..1, dead 0..1, alarm 0..1, hole (bool), patch 0..1 (placa cobrindo o furo), leak 0..1 (folhas voando pro furo),
+  // door 0..1 (fechando), dim 0..1, frost 0..1 (luz fria)
+  mkEnv('shipfarm', (g) => {
+    const R = rng(311); const L = 40;
+    const flT = cvs(128, 128, (x, w, h) => { x.fillStyle = '#b7bcc2'; x.fillRect(0, 0, w, h); x.strokeStyle = '#9da3aa'; x.lineWidth = 4; x.strokeRect(2, 2, w - 4, h - 4); }); flT.wrapS = flT.wrapT = T.RepeatWrapping; flT.repeat.set(4, 20);
+    Pl(g, 9, L, new T.MeshLambertMaterial({ map: flT }), 0, 0, 0, [-Math.PI / 2, 0, 0]);
+    const wallC = 0xe7e9ec; B(g, 0.2, 4.4, L, wallC, -4.6, 2.2, 0); B(g, 0.2, 4.4, L, wallC, 4.6, 2.2, 0); B(g, 9.4, 0.2, L, 0xd4d8dd, 0, 4.3, 0); B(g, 9.4, 4.4, 0.2, 0xcfd3d8, 0, 2.2, 20.1);
+    // janelas com estrelas (faixa alta)
+    const starT = cvs(512, 64, (x, w, h) => { x.fillStyle = '#03050d'; x.fillRect(0, 0, w, h); const r2 = rng(5); for (let i = 0; i < 160; i++) { x.fillStyle = r2() < 0.15 ? '#9cc4ff' : '#fff'; x.fillRect(r2() * w, r2() * h, 1 + (r2() < 0.2), 1 + (r2() < 0.2)); } }); starT.wrapS = T.RepeatWrapping; starT.repeat.set(5, 1);
+    for (const sx of [-1, 1]) { const w = Pl(g, L - 2, 1.1, new T.MeshBasicMaterial({ map: starT }), sx * 4.48, 3.3, 0, [0, -sx * Math.PI / 2, 0]); for (let z = -18; z <= 18; z += 3) B(g, 0.1, 1.3, 0.15, 0x9aa0a8, sx * 4.45, 3.3, z); B(g, 0.12, 0.1, L - 2, 0x9aa0a8, sx * 4.45, 2.7, 0); B(g, 0.12, 0.1, L - 2, 0x9aa0a8, sx * 4.45, 3.9, 0); }
+    // luzes de crescimento
+    const ledM = new T.MeshBasicMaterial({ color: 0xff7ad9 }); for (const sx of [-2.6, 2.6]) B(g, 1.2, 0.06, L - 2, 0xffffff, sx, 4.16, 0).material = ledM;
+    const roomL = new T.PointLight(0xffd0f0, 0, 30); roomL.position.set(0, 3.6, 0); g.add(roomL); const alarmL = new T.PointLight(0xff2020, 0, 30); alarmL.position.set(0, 3.6, -6); g.add(alarmL);
+    // canteiros + plantas
+    const plants = []; const leafM = new T.MeshLambertMaterial({ color: 0x3fa34a }); const leafM2 = new T.MeshLambertMaterial({ color: 0x5cc24a }); const fruitM = new T.MeshLambertMaterial({ color: 0xe94a3a });
+    for (const sx of [-1, 1]) for (let z0 = -18; z0 < 18; z0 += 4) { if (sx < 0 && z0 >= -10 && z0 < -2) continue; B(g, 1.6, 0.7, 3.6, 0x8a929e, sx * 2.6, 0.35, z0 + 2); B(g, 1.45, 0.06, 3.45, 0x5a3b26, sx * 2.6, 0.71, z0 + 2);
+      for (let k = 0; k < 6; k++) { const pg = new T.Group(); pg.position.set(sx * 2.6 + (k % 2 ? 0.35 : -0.35), 0.72, z0 + 0.6 + Math.floor(k / 2) * 1.2); const s1 = new T.Mesh(new T.SphereGeometry(0.32, 8, 6), k % 3 ? leafM : leafM2); s1.position.y = 0.3; s1.scale.set(1, 0.9, 1); pg.add(s1); const s2 = new T.Mesh(new T.SphereGeometry(0.22, 8, 6), leafM); s2.position.set(0.12, 0.55, 0.05); pg.add(s2); if (k % 2 === 0) { const f = new T.Mesh(new T.SphereGeometry(0.06, 6, 4), fruitM); f.position.set(-0.2, 0.35, 0.2); pg.add(f); } g.add(pg); plants.push(pg); } }
+    // furo + placa
+    const holeM = new T.Mesh(new T.CircleGeometry(0.16, 16), new T.MeshBasicMaterial({ color: 0x000000 })); holeM.position.set(-4.48, 1.7, -6); holeM.rotation.y = Math.PI / 2; g.add(holeM);
+    const crack = new T.Mesh(new T.RingGeometry(0.17, 0.32, 16), new T.MeshBasicMaterial({ color: 0x6a6e74 })); crack.position.set(-4.485, 1.7, -6); crack.rotation.y = Math.PI / 2; g.add(crack);
+    const plate = B(g, 0.06, 0.9, 0.9, 0x8a929e, -4.45, 1.7, -6); const bolts = []; for (const [dy, dz] of [[-0.35, -0.35], [-0.35, 0.35], [0.35, -0.35], [0.35, 0.35]]) bolts.push(Sp(g, 0.04, 0x333333, -4.41, 1.7 + dy, -6 + dz));
+    // folhas voando
+    const leaves = []; for (let i = 0; i < 40; i++) { const m = new T.Mesh(new T.PlaneGeometry(0.14, 0.08), new T.MeshBasicMaterial({ color: i % 3 ? 0x4cbf4a : 0x8ad66a, side: T.DoubleSide, transparent: true })); g.add(m); leaves.push({ m, x: -1 + R() * 4, y: 0.8 + R() * 2.2, z: -14 + R() * 14, ph: R() }); }
+    // porta de emergência
+    const door = new T.Group(); g.add(door); B(door, 9, 4.2, 0.3, 0xf2b705, 0, 0, 0); for (let i = -4; i <= 4; i++) B(door, 0.5, 4.2, 0.32, 0x222222, i, 0, 0, { r: [0, 0, 0.6] }); door.position.set(0, 6.4, -19);
+    B(g, 9.4, 0.4, 0.5, 0x555b63, 0, 4.1, -19); for (const sx of [-1, 1]) B(g, 0.4, 4.2, 0.5, 0x555b63, sx * 4.4, 2.1, -19); B(g, 9.4, 4.4, 0.2, 0xcfd3d8, 0, 2.2, -20.1);
+    return { bg: 0x101218, fog: null, hemi: [0xffe6f6, 0x6a6f76, 1.05], sun: [0xffffff, 0.45, [3, 10, 6]],
+      apply(p, t) { const al = clamp(p.alarm || 0), bl = al > 0 ? (Math.sin(t * 7) > 0 ? 1 : 0.2) : 0; const dm = clamp(p.dim || 0), fr = clamp(p.frost || 0);
+        this.hemi = [mix(0xffe6f6, 0xa8c8ff, fr).getHex(), 0x6a6f76, 1.05 - 0.6 * dm]; roomL.intensity = 8 * (1 - dm); alarmL.intensity = 25 * al * bl; ledM.color.copy(mix(0xff7ad9, 0x332233, dm));
+        const gr = p.plant ?? 1, dead = clamp(p.dead || 0); leafM.color.copy(mix(0x3fa34a, 0x8a6a2a, dead)); leafM2.color.copy(mix(0x5cc24a, 0x9a7a3a, dead)); plants.forEach((pg, i) => { pg.scale.setScalar(Math.max(0.02, gr) * (1 - dead * 0.35)); pg.rotation.z = (p.leak ? Math.sin(t * 9 + i) * 0.08 * p.leak : 0); });
+        const hv = !!p.hole; holeM.visible = crack.visible = hv; const pa = clamp(p.patch || 0); plate.visible = pa > 0.01; plate.scale.set(1, Math.max(0.05, pa), Math.max(0.05, pa)); bolts.forEach(b => b.visible = pa > 0.98);
+        const lk = clamp(p.leak || 0); leaves.forEach((o, i) => { const u = ((t * (0.5 + o.ph * 0.5) + o.ph) % 1); const on = lk > 0.01; o.m.visible = on; if (!on) return; o.m.position.set(lerp(o.x, -4.4, u * u), lerp(o.y, 1.7, u * u) + Math.sin(t * 6 + i) * 0.05, lerp(o.z, -6, u * u)); o.m.rotation.set(t * 5 + i, t * 3, i); o.m.material.opacity = lk * (1 - u * 0.5); });
+        door.position.y = lerp(6.4, 2.1, clamp(p.door || 0)); } };
   });
 }
