@@ -83,7 +83,7 @@ function makeCtx(beat, t) {
     track(name, keys) { const c = CH[name]; return placeChar(c, keys, t, ctx); },
     mini(i, o) { const c = MINI[i]; c.root.visible = true; c.root.position.set(...o.p); c.root.rotation.y = o.ry || 0; const A = ANIMS[o.a || 'idle'](t + i * 0.37, (o.ph != null ? o.ph : t * 4) + i); c.pose(A, Object.assign({ name: o.e || 'happy' }, EMOTES[o.e || 'happy'])); c.shadow.visible = true; if (o.s) c.root.scale.setScalar(o.s); return c; },
     ui(h) { ui.push(h); },
-    proj(v) { const p = new THREE.Vector3(...v).project(camera); return { x: (p.x * 0.5 + 0.5) * W, y: (-p.y * 0.5 + 0.5) * H, z: p.z }; },
+    proj(v) { camera.updateMatrixWorld(); const p = new THREE.Vector3(...v).project(camera); return { x: (p.x * 0.5 + 0.5) * W, y: (-p.y * 0.5 + 0.5) * H, z: p.z }; },
     at(str) { const s = str.toLowerCase(); const parts = []; let full = ''; for (const c of beat.chunks) { const txt = c.words.map(w => w.w).join(' ').toLowerCase(); parts.push({ s: full.length, e: full.length + txt.length, c }); full += txt + ' '; }
       const ix = full.indexOf(s); if (ix < 0) { console.warn('at? ' + str + ' in ' + beat.id); return beat.dur * 0.5; }
       const p = parts.find(q => ix >= q.s && ix < q.e + 1) || parts[parts.length - 1]; return lerp(p.c.t0, p.c.t1, clamp((ix - p.s) / Math.max(1, p.e - p.s))); },

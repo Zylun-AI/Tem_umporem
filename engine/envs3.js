@@ -15,7 +15,7 @@ export function moreEnvs(U) {
     const wall = 0xe9dfcf; B(g, 16, 3.6, 0.2, wall, 0, 1.8, -6); B(g, 0.2, 3.6, 12, wall, -8, 1.8, 0); B(g, 0.2, 3.6, 12, wall, 8, 1.8, 0); B(g, 16, 0.2, 12, 0xf7f3ec, 0, 3.6, 0);
     B(g, 16, 0.25, 0.25, 0xffffff, 0, 0.12, -5.85);                                           // rodapé
     // janela
-    B(g, 3.2, 2.0, 0.08, 0x9fd6ff, -3, 2.0, -5.88, { basic: true }); B(g, 3.4, 0.12, 0.15, 0xffffff, -3, 3.0, -5.85); B(g, 3.4, 0.12, 0.15, 0xffffff, -3, 1.0, -5.85); B(g, 0.12, 2.0, 0.15, 0xffffff, -3, 2.0, -5.85);
+    const winH = B(g, 3.2, 2.0, 0.08, 0x9fd6ff, -3, 2.0, -5.88, { basic: true }); B(g, 3.4, 0.12, 0.15, 0xffffff, -3, 3.0, -5.85); B(g, 3.4, 0.12, 0.15, 0xffffff, -3, 1.0, -5.85); B(g, 0.12, 2.0, 0.15, 0xffffff, -3, 2.0, -5.85);
     // porta
     const door = new T.Group(); door.position.set(7.88, 0, 2.5); g.add(door); B(door, 0.1, 2.6, 1.3, 0x7a4a26, 0, 1.3, 0.65); Sp(door, 0.07, 0xf2c94c, -0.1, 1.25, 1.15);
     // sofá
@@ -31,7 +31,12 @@ export function moreEnvs(U) {
     B(g, 1.4, 0.06, 1.0, 0xffffff, -5, 0.95, -2.8); for (const sx of [-0.6, 0.6]) for (const sz of [-0.4, 0.4]) B(g, 0.06, 0.92, 0.06, 0x999999, -5 + sx, 0.46, -2.8 + sz);
     // cadeira
     B(g, 0.6, 0.06, 0.6, 0x6b4423, -5, 0.5, -1.9); B(g, 0.6, 0.6, 0.06, 0x6b4423, -5, 0.8, -1.6); for (const sx of [-0.25, 0.25]) for (const sz of [-0.25, 0.25]) B(g, 0.05, 0.5, 0.05, 0x6b4423, -5 + sx, 0.25, -1.9 + sz);
-    return { bg: 0xcfe8ff, hemi: [0xffffff, 0x9a8a78, 1.15], sun: [0xfff4e0, 0.75, [-6, 12, 8]], apply(p) { door.rotation.y = -(p.door || 0) * 1.4; scr.material.color.set(p.tv === false ? 0x111111 : (p.tvColor || 0x2a6fd6)); } };
+    // buraco na parede da direita (x=+8, z=-2.5): p.hole 0 = sem buraco, ~0.05 = buraquinho no pé da parede, 1 = buraco grande (1,1 x 0,9 m)
+    const hole = B(g, 0.04, 1, 1, 0x1a120c, 7.88, 0.5, -2.5); const rim = B(g, 0.03, 1, 1, 0xb9ab95, 7.89, 0.5, -2.5);
+    // p.night: sala de madrugada (luz azulada, janela escura, TV desligada se tv não for dado)
+    return { bg: 0xcfe8ff, hemi: [0xffffff, 0x9a8a78, 1.15], sun: [0xfff4e0, 0.75, [-6, 12, 8]], apply(p) { door.rotation.y = -(p.door || 0) * 1.4; scr.material.color.set(p.tv === false || (p.night && p.tv === undefined) ? 0x111111 : (p.tvColor || 0x2a6fd6));
+      const n = !!p.night; this.bg = n ? 0x0b1430 : 0xcfe8ff; this.hemi = n ? [0x8aa6ff, 0x2a2440, 0.62] : [0xffffff, 0x9a8a78, 1.15]; this.sun = n ? [0x9ab4ff, 0.32, [-6, 12, 8]] : [0xfff4e0, 0.75, [-6, 12, 8]]; winH.material.color.set(n ? 0x16234a : 0x9fd6ff);
+      const h = p.hole || 0; hole.visible = rim.visible = h > 0; if (h > 0) { const w = lerp(0.18, 1.1, h), hh = lerp(0.13, 0.9, h); hole.scale.set(1, hh, w); hole.position.y = hh / 2 + 0.01; rim.scale.set(1, hh + 0.08 * h, w + 0.12 * h); rim.position.y = (hh + 0.08 * h) / 2; } } };
   });
 
   // ================= AVIÃO: CABINE =================
