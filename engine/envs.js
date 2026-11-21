@@ -1,6 +1,7 @@
 import { lam } from './chars.js';
 import { extraEnvs } from './envs2.js';
 import { moreEnvs } from './envs3.js';
+import { caveEnvs } from './envs4.js';
 
 export function buildEnvs(THREE, scene) {
   const envs = {};
@@ -127,5 +128,6 @@ export function buildEnvs(THREE, scene) {
   // marcador p/ outros módulos
   extraEnvs({ THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, winTex, mix, clamp, lerp, col, lam, hex });
   moreEnvs({ THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, winTex, mix, clamp, lerp, col, lam, hex });
+  caveEnvs({ THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, winTex, mix, clamp, lerp, col, lam, hex });
   return envs;
 }

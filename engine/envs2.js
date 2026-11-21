@@ -245,9 +245,10 @@ export function extraEnvs(U) {
     for (const [x, z] of [[-5.6, -4.8], [-4.8, -5.0]]) Cy(g, 0.45, 0.45, 1.1, 0x2a6ad6, x, 0.55, z); B(g, 1.4, 0.5, 0.6, 0xd62828, 5, 0.25, -3); B(g, 1.0, 0.04, 0.4, 0x999, 5.2, 0.52, -3);
     for (let i = 0; i < 3; i++) Cy(g, 0.06, 0.06, 12, [0x777, 0x999, 0x666][i], 0, 4.1 - i * 0.2, -5.7, { r: [0, 0, Math.PI / 2] });
     const bulb = new T.Mesh(new T.SphereGeometry(0.18, 10, 8), new T.MeshBasicMaterial({ color: 0xfff1b0 })); bulb.position.set(0, 3.9, 0); g.add(bulb); g.userData.bulb = bulb; const bl = new T.PointLight(0xfff1b0, 0, 18); bl.position.set(0, 3.8, 0); g.add(bl); g.userData.bl = bl;
+    const gw = new T.Mesh(new T.PlaneGeometry(14, 12), new T.MeshLambertMaterial({ color: 0x2f6f90, transparent: true, opacity: 0.78 })); gw.rotation.x = -Math.PI / 2; g.add(gw); g.userData.gw = gw;
     const cab = []; for (const [c, z] of [[0xd62828, 1.2], [0x111111, 1.5]]) { const cp = new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([new T.Vector3(1.3 + (z - 1.2) * 1.6, 1.9, -1.5), new T.Vector3(1.5, 1.2, -0.4), new T.Vector3(2.3, 0.02, 0.5), new T.Vector3(3.5, 0.02, 1.8)]), 14, 0.05, 6), lam(c)); g.add(cp); }
     return { bg: 0x08090b, fog: [0x08090b, 12, 40], hemi: [0xb0c0d8, 0x30353a, 0.2], sun: [0xffe0a0, 0.0, [0, 10, 5]], apply(p, t) { const pw = p.power === undefined ? 0 : p.power; this.hemi = [0xb0c0d8, 0x30353a, 0.18 + 0.9 * pw]; g.userData.bl.intensity = 30 * pw; g.userData.bulb.material.color.set(pw > 0.1 ? 0xfff1b0 : 0x222222);
-        const sh = p.shake || 0; g.userData.gen.position.set(Math.sin(t * 60) * 0.03 * sh, Math.abs(Math.sin(t * 50)) * 0.03 * sh, -2.4); g.userData.crank.rotation.x = p.crank || 0;
+        const sh = p.shake || 0; g.userData.gen.position.set(Math.sin(t * 60) * 0.03 * sh, Math.abs(Math.sin(t * 50)) * 0.03 * sh, -2.4); g.userData.crank.rotation.x = p.crank || 0; const wl = p.water || 0; g.userData.gw.visible = wl > 0.001; g.userData.gw.position.y = wl * 0.9 + Math.sin(t * 2) * 0.01;
         const sm = p.smoke || 0; g.userData.smoke.forEach((s, i) => { const ph = (t * 0.8 + i / 12) % 1; s.position.set(1.5 + Math.sin(i * 2) * 0.3, 4.6 + ph * 2.6, -2.9 + Math.cos(i) * 0.3); s.scale.setScalar(0.4 + ph * 1.6); s.material.opacity = (1 - ph) * 0.6 * sm; s.visible = sm > 0.01; }); } };
   });
 
