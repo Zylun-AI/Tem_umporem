@@ -232,7 +232,11 @@ export function extraEnvs(U) {
     Cy(g, 0.35, 0.35, 0.06, 0xffffff, 6, 3.2, -5.8, { r: [Math.PI / 2, 0, 0] }); B(g, 0.03, 0.25, 0.02, 0x111, 6, 3.28, -5.75); B(g, 0.2, 0.03, 0.02, 0x111, 6.08, 3.2, -5.75);
     for (let i = 0; i < 3; i++) { B(g, 2.4, 1.8, 0.1, 0x9fd4ff, -3 + i * 3, 2.4, 5.9, { basic: true }); B(g, 2.6, 0.12, 0.3, 0xfff, -3 + i * 3, 1.45, 5.8); }
     B(g, 1.4, 1.0, 0.06, 0xf5e6c8, -7.9, 2.3, -3.5, { r: [0, Math.PI / 2, 0] }); B(g, 1.0, 1.2, 0.06, 0x9a6a3a, -7.9, 2.3, -1.6, { r: [0, Math.PI / 2, 0] });
-    return { bg: 0xfff3d0, fog: null, hemi: [0xfff9e8, 0x9a8a6a, 1.05], sun: [0xfff0d0, 0.5, [5, 12, 10]], apply(p, t) { const D = g.userData.bc; D.bx.fillStyle = '#fbfbf8'; D.bx.fillRect(0, 0, 1536, 576); D.bx.strokeStyle = '#d5d9dd'; D.bx.lineWidth = 3; D.bx.strokeRect(6, 6, 1524, 564); if (p.board) p.board(D.bx, 1536, 576); D.bt.needsUpdate = true; } };
+    // porta na parede da direita (x=8), vão z 1.6..2.8, dobradiça em z=1.6; p.door 0..1 abre para dentro
+    B(g, 0.32, 0.14, 1.5, 0x6a3f24, 7.85, 2.42, 2.2); for (const z of [1.52, 2.88]) B(g, 0.32, 2.4, 0.14, 0x6a3f24, 7.85, 1.2, z);
+    B(g, 0.12, 2.3, 1.2, 0x2a2016, 7.97, 1.15, 2.2, { basic: true });
+    const dr = new T.Group(); dr.position.set(7.84, 0, 1.6); g.add(dr); B(dr, 0.07, 2.3, 1.2, 0x8a5a32, 0, 1.15, 0.6); B(dr, 0.06, 0.5, 0.4, 0xbfe3ff, -0.03, 1.7, 0.6, { basic: true }); Sp(dr, 0.05, 0xd4af37, -0.08, 1.05, 1.05);
+    return { bg: 0xfff3d0, fog: null, hemi: [0xfff9e8, 0x9a8a6a, 1.05], sun: [0xfff0d0, 0.5, [5, 12, 10]], apply(p, t) { dr.rotation.y = -(p.door || 0) * 1.5; const D = g.userData.bc; D.bx.fillStyle = '#fbfbf8'; D.bx.fillRect(0, 0, 1536, 576); D.bx.strokeStyle = '#d5d9dd'; D.bx.lineWidth = 3; D.bx.strokeRect(6, 6, 1524, 564); if (p.board) p.board(D.bx, 1536, 576); D.bt.needsUpdate = true; } };
   });
 
   // ================= SALA DO GERADOR =================
