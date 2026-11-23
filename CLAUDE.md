@@ -74,7 +74,7 @@ Opções: `skin` light|tan|brown|dark|white|yellow, `shirt`, `pants`, `shoes`, `
 - Longo: 1 corte a cada 3–6 s; short: 1 corte a cada ~2 s, quase sempre plano médio de 1–2 personagens.
 
 ## Arquivos
-- `engine/` motor (three.js): `main.js` (contexto e render), `chars.js` (palito, poses, props), `roblox.js` (Roblox), `envs*.js` (cenários), `vehicles.js`, `kit.js`.
+- `engine/` motor (three.js): `main.js` (contexto e render), `chars.js` (palito, poses, props), `roblox.js` (Roblox), `envs*.js` (cenários; `envs5.js` = ilha), `vehicles.js`, `kit.js`.
 - `tools/tts.py` narração+timeline, `tools/render.js` quadros, `tools/mix.py` SFX+trilha, `tools/meta.py` youtube.json, `tools/build.sh` tudo, `tools/upload.py` YouTube (secrets `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN`), `tools/get_token.py` gera o refresh token.
 - O repositório é **público** (minutos ilimitados no Actions); nunca coloque senhas em arquivos.
 
@@ -93,4 +93,5 @@ Opções: `skin` light|tan|brown|dark|white|yellow, `shirt`, `pants`, `shoes`, `
 - 2026-11-21 longo: E se a humanidade tivesse que recomeçar debaixo da terra? (`2026-11-21-humanidade-debaixo-da-terra`) — Nara, Beto, Dra. Luz, Tito, bebê Sol; supervulcão; enchente no túnel e gerador; publica 18:00. (Motor: novo cenário `cave` em `engine/envs4.js` (cidade na caverna: {sun, power, lamp, lights, plant, dead, water, alarm, cage}) e `gen` ganhou `{water}`.)
 - 2026-11-22 short: Ela achou um recado embaixo da carteira da escola (`2026-11-22-short-carteira-da-escola`) — professora Ana volta à escola; resposta em caneta vermelha da Prof.ª Marta, hoje diretora; publica 12:00. (Motor: `classroom` ganhou porta na parede x=8, z≈2,2, com `{door: 0..1}`.)
 - 2026-11-23 short: Ele devolveu um livro com 30 anos de atraso (`2026-11-23-short-livro-atrasado`) — Paulo devolve livro; bibliotecária Dona Cida tinha pago a multa ("ele vai voltar"); ele vira escritor e dedica o livro a ela; publica 12:00. (Motor: `library` ganhou `{desk:true, drawer:0..1}` = balcão de empréstimo em z=2, atendente em z≈1,15, cliente em z≈2,95.)
-- Ideia já prometida no final do vídeo 6: "E se a humanidade tivesse que recomeçar numa ilha deserta?" — boa candidata a próximo longo (`ocean`, `farm`, `final`).
+- 2026-11-23 longo: E se a humanidade tivesse que recomeçar numa ilha deserta? (`2026-11-23-humanidade-ilha-deserta`) — Mari, Zeca, Dra. Rosa, Kiko; tempestade solar (Carrington), navio à deriva; furacão e a tampa da caixa d'água; brasa no pote; publica 18:00. (Motor: novo cenário `island` em `engine/envs5.js` — ilha com {fire, lid, rope, tarp, tank, tanks, huts, roofs, houses, cross, plant, wreck, ship, storm, rain, surge, tod, stars, aurora}; ver comentários no arquivo.)
+- Ideia já prometida no final do vídeo de 23/11: "E se a humanidade tivesse que recomeçar na Antártida?" — boa candidata a próximo longo.
