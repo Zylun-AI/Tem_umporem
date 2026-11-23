@@ -156,7 +156,7 @@ if __name__ == '__main__':
             tt = t[a:b]-k*beat*8
             pl = sum(np.sin(2*np.pi*f*tt)*np.exp(-((tt % (beat/2)))*6) for f in ch)*0.028
             bass = np.sin(2*np.pi*ch[0]/2*tt)*np.exp(-((tt % beat))*5)*0.05
-            hat = hp(noise((b-a)/SR),6000)[:b-a]*np.exp(-((tt+beat/2) % beat)*40)*0.02
+            hat = hp(rng.standard_normal(b-a),6000)*np.exp(-((tt+beat/2) % beat)*40)*0.02
             mus[a:b] += pl + bass + hat
         mix += mus*0.8
     else:
