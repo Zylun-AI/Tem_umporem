@@ -217,7 +217,14 @@ export function extraEnvs(U) {
     const mo = new T.Group(); mo.position.set(0, 1.06, -6); B(mo, 1.3, 0.7, 0.8, 0x3a3f45, 0, 0.35, 0); for (let i = 0; i < 4; i++) Cy(mo, 0.14, 0.14, 0.5, 0x8a929a, -0.45 + i * 0.3, 0.9, 0); B(mo, 0.3, 0.5, 0.3, 0xd62828, 0.8, 0.3, 0.1); g.add(mo); g.userData.motor = mo;
     for (const x of [-11, 11]) { B(g, 2.6, 5.4, 0.2, 0x9fd4ff, x, 4.5, 13.7, { basic: true, m: { transparent: true, opacity: 0.9 } }); const bm = new T.Mesh(new T.PlaneGeometry(2.6, 18), new T.MeshBasicMaterial({ color: 0xffe9b0, transparent: true, opacity: 0.12, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide })); bm.position.set(x * 0.8, 4.5, 6); bm.rotation.set(-1.0, 0, 0); g.add(bm); }
     const bolts = []; for (let i = 0; i < 10; i++) { const b = Cy(g, 0.05, 0.05, 0.18, 0xb8bec6, 0, -9, 0); bolts.push(b); } g.userData.bolts = bolts;
-    return { bg: 0x2a1c10, fog: [0x2a1c10, 25, 70], hemi: [0xffe9c4, 0x6a4a2a, 0.95], sun: [0xffe0a0, 0.6, [10, 30, 20]], apply(p, t) { const bl = p.bolts || []; g.userData.bolts.forEach((b, i) => { const q = bl[i]; if (q) { b.position.set(q[0], q[1], q[2]); b.rotation.set(t * 9 + i, 0, t * 7); b.visible = true; } else b.visible = false; }); } };
+    // p.desk: balcão de empréstimo em z=2 (tampo y=1.1, x −2.2..2.2), atendente atrás em z≈1.1 olhando +z, cliente em z≈2.9 olhando −z.
+    // Gaveta (p.drawer 0..1) abre para o lado do atendente; carimbo + fichário em cima; esconde o motor da mesa central.
+    const desk = new T.Group(); desk.position.set(0, 0, 2); g.add(desk);
+    B(desk, 4.4, 1.04, 0.8, 0x7a4a2b, 0, 0.52, 0); B(desk, 4.6, 0.08, 1.0, 0x5a3820, 0, 1.08, 0); B(desk, 4.3, 0.06, 0.02, 0xd4af37, 0, 0.8, 0.41);
+    B(desk, 0.5, 0.32, 0.35, 0x2e6fb5, -1.5, 1.28, -0.1); for (let k = 0; k < 3; k++) B(desk, 0.1, 0.26, 0.3, [0xf4efe0, 0xc0392b, 0xf4efe0][k], -1.65 + k * 0.12, 1.42, -0.1);
+    Cy(desk, 0.07, 0.07, 0.14, 0x222222, 1.2, 1.19, -0.05); Cy(desk, 0.03, 0.03, 0.12, 0x8a5a32, 1.2, 1.32, -0.05); B(desk, 0.5, 0.03, 0.35, 0xe8dcc4, 1.7, 1.13, 0.05);
+    const drw = B(desk, 1.0, 0.22, 0.7, 0x8a5a32, 0.6, 0.86, 0); B(drw, 0.25, 0.04, 0.04, 0xd4af37, 0, 0, -0.37); g.userData.drw = drw;
+    return { bg: 0x2a1c10, fog: [0x2a1c10, 25, 70], hemi: [0xffe9c4, 0x6a4a2a, 0.95], sun: [0xffe0a0, 0.6, [10, 30, 20]], apply(p, t) { desk.visible = !!p.desk; g.userData.motor.visible = !p.desk; g.userData.drw.position.z = -(p.drawer || 0) * 0.5; const bl = p.bolts || []; g.userData.bolts.forEach((b, i) => { const q = bl[i]; if (q) { b.position.set(q[0], q[1], q[2]); b.rotation.set(t * 9 + i, 0, t * 7); b.visible = true; } else b.visible = false; }); } };
   });
 
   // ================= SALA DE AULA =================
