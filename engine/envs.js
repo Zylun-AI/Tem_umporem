@@ -6,6 +6,7 @@ import { islandEnvs } from './envs5.js';
 import { iceEnvs } from './envs6.js';
 import { desertEnvs } from './envs7.js';
 import { moonEnvs } from './envs8.js';
+import { shipEnvs } from './envs9.js';
 
 export function buildEnvs(THREE, scene) {
   const envs = {};
@@ -137,5 +138,6 @@ export function buildEnvs(THREE, scene) {
   iceEnvs({ THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, winTex, mix, clamp, lerp, col, lam, hex });
   desertEnvs({ THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, winTex, mix, clamp, lerp, col, lam, hex });
   moonEnvs({ THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, winTex, mix, clamp, lerp, col, lam, hex });
+  shipEnvs({ THREE, B, Cy, Sp, Pl, cvs, mkEnv, rng, sky, winTex, mix, clamp, lerp, col, lam, hex });
   return envs;
 }
